@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>COMUNICAR – Arquitectos Digitales de la Tribu</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ╔══════════════════════════════════════════╗
+   ║  COMUNICAR – CSS VARIABLES & RESET       ║
+   ╚══════════════════════════════════════════╝ */
+:root{
+  --cave:#0d0906;--cave2:#181009;--cave3:#241508;
+  --stone:#2e1f0e;--stone2:#4a3520;--stone3:#6b5030;
+  --parch:#f2deb8;--parch2:#e8ccaa;--parch3:#d4b896;
+  --clay:#c4622a;--clay2:#d4733b;--terr:#9e3d18;
+  --ochre:#c8882a;--gold:#e8a820;--gold2:#f5bf40;
+  --moss:#3a5c2a;--moss2:#4e7838;--sage:#6e9e5a;
+  --bone:#d8c8a8;--ash:#8a7058;--smoke:#5a4030;
+  --blood:#7a1c1c;--ember:#e85010;--flame:#ff7020;
+  --ink:#1a1008;
+  --font-display:'Cinzel Decorative',serif;
+  --font-title:'Cinzel',serif;
+  --font-body:'Lora',serif;
+  --font-mono:'Courier Prime',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--cave);
+  color:var(--parch);
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  min-height:100vh;
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='3' fill='%23c8882a' opacity='.9'/%3E%3C/svg%3E") 10 10, auto;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");
+  opacity:.5;
+}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--cave)}
+::-webkit-scrollbar-thumb{background:var(--clay);border-radius:2px}
+
+/* ── LOADING ── */
+#loading{
+  position:fixed;inset:0;background:var(--cave);z-index:10000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  transition:opacity 1s;
+}
+.ld-glyph{font-size:3.5rem;animation:glyphPulse 1.4s ease-in-out infinite alternate}
+@keyframes glyphPulse{
+  from{filter:drop-shadow(0 0 6px var(--ochre));transform:scale(1)}
+  to{filter:drop-shadow(0 0 28px var(--gold2)) drop-shadow(0 0 60px var(--ember));transform:scale(1.1)}
+}
+.ld-text{font-family:var(--font-title);font-size:.75rem;color:var(--ash);letter-spacing:6px;animation:breathe 2s infinite}
+@keyframes breathe{0%,100%{opacity:.4}50%{opacity:1}}
+.ld-bar{width:240px;height:2px;background:rgba(200,140,40,.12);border:1px solid rgba(200,140,40,.2);border-radius:1px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--terr),var(--gold2));width:0;transition:width .2s;box-shadow:0 0 10px var(--ochre)}
+
+/* ── CINEMATIC INTRO ── */
+#cinematic{
+  position:fixed;inset:0;z-index:5000;background:var(--cave);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.cin-cave-top{
+  position:absolute;top:0;left:0;right:0;height:200px;
+  background:var(--cave2);
+  clip-path:polygon(0 0,100% 0,100% 40%,96% 90%,92% 30%,88% 80%,84% 20%,80% 75%,76% 35%,72% 85%,68% 25%,64% 70%,60% 32%,56% 80%,52% 20%,48% 65%,44% 18%,40% 72%,36% 28%,32% 82%,28% 22%,24% 68%,20% 15%,16% 60%,12% 25%,8% 78%,4% 30%,0 55%)
+}
+.cin-cave-bot{
+  position:absolute;bottom:0;left:0;right:0;height:160px;
+  background:var(--cave2);
+  clip-path:polygon(0 100%,100% 100%,100% 50%,96% 10%,92% 60%,88% 15%,84% 65%,80% 20%,76% 55%,72% 10%,68% 50%,64% 5%,60% 45%,56% 0%,52% 40%,48% 8%,44% 50%,40% 12%,36% 48%,32% 2%,28% 42%,24% 10%,20% 55%,16% 5%,12% 48%,8% 18%,4% 62%,0 30%)
+}
+.cin-torch{position:absolute;pointer-events:none}
+.cin-torch::before{
+  content:'';display:block;border-radius:50%;
+  animation:torchGlow .8s ease-in-out infinite alternate;
+}
+.cin-torch.left{left:8%;bottom:165px;width:160px;height:380px;
+  background:radial-gradient(ellipse at 20% 60%,rgba(232,160,32,.2),transparent 65%)}
+.cin-torch.right{right:8%;bottom:165px;width:160px;height:380px;
+  background:radial-gradient(ellipse at 80% 60%,rgba(232,160,32,.2),transparent 65%)}
+@keyframes torchGlow{from{opacity:.5}to{opacity:1}}
+#cin-content{position:relative;z-index:10;text-align:center;padding:1.5rem;max-width:700px}
+.cin-ep{font-family:var(--font-title);font-size:.65rem;color:var(--ash);letter-spacing:8px;opacity:0;animation:riseUp 1s 1.5s forwards;margin-bottom:10px}
+.cin-h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,4rem);line-height:1.1;opacity:0;animation:carve 2s 2.5s forwards;margin-bottom:.3rem}
+.cin-h1 span:first-child{display:block;color:transparent;background:linear-gradient(135deg,var(--gold2) 0%,var(--ochre) 55%,var(--clay) 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 22px rgba(200,136,42,.6))}
+.cin-h1 span:last-child{display:block;font-size:.38em;font-family:var(--font-title);color:var(--parch3);letter-spacing:5px;margin-top:6px}
+.cin-sub{font-family:var(--font-body);font-style:italic;color:var(--ash);font-size:.88rem;letter-spacing:2px;opacity:0;animation:riseUp 1.2s 4.5s forwards;margin-bottom:1.8rem}
+.cin-scroll{
+  background:rgba(10,7,3,.88);border:1px solid rgba(200,136,42,.28);border-radius:3px;
+  padding:1.4rem 1.8rem;text-align:left;opacity:0;animation:riseUp 1.2s 5.5s forwards;margin-bottom:1.8rem;
+  position:relative;backdrop-filter:blur(3px);
+}
+.cin-scroll::before,.cin-scroll::after{
+  content:'〰〰〰〰〰';display:block;text-align:center;
+  color:rgba(200,136,42,.4);font-size:.65rem;letter-spacing:4px;padding:4px 0;
+}
+.cin-story{font-size:.83rem;line-height:1.95;color:var(--parch2)}
+.cin-story strong{color:var(--gold2)}
+.btn-enter{
+  opacity:0;animation:riseUp 1s 7s forwards;
+  padding:.9rem 2.8rem;background:linear-gradient(135deg,var(--terr),var(--clay),var(--ochre));
+  border:none;border-radius:2px;font-family:var(--font-title);font-size:.85rem;
+  color:var(--cave);letter-spacing:4px;cursor:pointer;text-transform:uppercase;
+  box-shadow:0 0 30px rgba(200,100,40,.45),inset 0 1px 0 rgba(255,255,255,.15);
+  transition:all .3s;
+}
+.btn-enter:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(200,100,40,.7),0 4px 20px rgba(0,0,0,.5)}
+#embers{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.ember{position:absolute;border-radius:50%;pointer-events:none;animation:emberFly linear forwards}
+@keyframes emberFly{
+  0%{opacity:1;transform:translateY(0) translateX(0) scale(1)}
+  100%{opacity:0;transform:translateY(-200px) translateX(var(--dx,20px)) scale(.3)}
+}
+@keyframes riseUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes carve{from{opacity:0;letter-spacing:20px}to{opacity:1;letter-spacing:normal}}
+
+/* ── HUD ── */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:400;
+  background:linear-gradient(180deg,rgba(13,9,6,.98) 0%,rgba(24,16,9,.92) 100%);
+  border-bottom:1px solid rgba(200,136,42,.18);
+  padding:6px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  backdrop-filter:blur(12px);
+}
+.hud-brand{font-family:var(--font-title);font-size:.68rem;color:var(--ochre);letter-spacing:3px;filter:drop-shadow(0 0 8px rgba(200,136,42,.4))}
+.hud-sep{flex:1}
+.hud-stat{font-family:var(--font-title);font-size:.62rem;color:var(--ash);white-space:nowrap;display:flex;align-items:center;gap:5px}
+.hud-val{color:var(--gold2);font-size:.78rem;min-width:28px}
+#xp-track{width:110px;height:4px;background:rgba(200,136,42,.1);border:1px solid rgba(200,136,42,.18);border-radius:2px;overflow:hidden}
+#xp-bar{height:100%;background:linear-gradient(90deg,var(--terr),var(--gold2));border-radius:2px;transition:width .9s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px var(--ochre)}
+#lvl-gem{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--terr),var(--cave2));
+  border:1.5px solid var(--ochre);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-title);font-size:.68rem;color:var(--gold2);
+  box-shadow:0 0 12px rgba(200,136,42,.28);
+}
+.badge-row{display:flex;gap:4px}
+.bdg{font-size:1rem;opacity:.18;filter:grayscale(1);transition:all .55s;cursor:help;position:relative}
+.bdg.lit{opacity:1;filter:none;animation:bdgPop .6s ease}
+@keyframes bdgPop{0%{transform:scale(0) rotate(-18deg)}60%{transform:scale(1.35) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+.bdg:hover::after{
+  content:attr(data-tip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);
+  background:rgba(13,9,6,.97);border:1px solid rgba(200,136,42,.3);
+  padding:3px 9px;border-radius:2px;font-size:.58rem;white-space:nowrap;
+  font-family:var(--font-title);color:var(--parch);pointer-events:none;margin-bottom:4px;z-index:500;
+}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  position:fixed;left:0;top:44px;bottom:0;width:48px;
+  background:rgba(13,9,6,.97);border-right:1px solid rgba(200,136,42,.12);
+  z-index:200;display:flex;flex-direction:column;align-items:center;
+  padding:10px 0;gap:4px;overflow-y:auto;
+}
+.sdot{
+  width:30px;height:30px;border-radius:50%;
+  border:1.5px solid rgba(200,136,42,.2);background:var(--cave2);
+  display:flex;align-items:center;justify-content:center;font-size:.82rem;
+  cursor:pointer;transition:all .3s;position:relative;color:var(--smoke);
+}
+.sdot.on{border-color:var(--ochre);box-shadow:0 0 12px rgba(200,136,42,.4);color:var(--gold2);background:rgba(200,136,42,.06)}
+.sdot.done{border-color:var(--moss2);background:rgba(74,120,56,.1);color:var(--sage)}
+.sdot:hover .stt{opacity:1;pointer-events:auto}
+.stt{
+  position:absolute;left:38px;white-space:nowrap;
+  background:rgba(13,9,6,.97);border:1px solid rgba(200,136,42,.3);
+  padding:3px 9px;border-radius:2px;font-size:.6rem;color:var(--parch);
+  opacity:0;pointer-events:none;transition:opacity .2s;font-family:var(--font-title);
+  letter-spacing:1px;z-index:400;
+}
+.svr{width:2px;height:8px;background:rgba(200,136,42,.12);flex-shrink:0}
+
+/* ── MAIN AREA ── */
+#app{display:none}
+#main{margin-left:48px;margin-top:44px;min-height:calc(100vh - 44px)}
+.sec{display:none;padding:28px 32px;min-height:calc(100vh - 44px);position:relative;animation:secIn .65s ease}
+.sec.on{display:block}
+@keyframes secIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sec::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:radial-gradient(ellipse 60% 55% at 15% 30%,rgba(40,22,8,.7),transparent 60%),
+             radial-gradient(ellipse 50% 60% at 85% 75%,rgba(25,15,5,.5),transparent 60%),
+             linear-gradient(180deg,var(--cave) 0%,rgba(18,12,5,.97) 100%);
+}
+
+/* ── SECTION HEADER ── */
+.sec-head{text-align:center;margin-bottom:26px}
+.sec-ep{font-family:var(--font-title);font-size:.58rem;letter-spacing:6px;color:var(--smoke);text-transform:uppercase;margin-bottom:6px}
+.sec-title{font-family:var(--font-display);font-size:clamp(1.5rem,3.2vw,2.6rem);line-height:1.2;margin-bottom:8px}
+.sec-title.oc{color:transparent;background:linear-gradient(135deg,var(--gold2),var(--ochre));-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 16px rgba(200,136,42,.4))}
+.sec-title.cl{color:transparent;background:linear-gradient(135deg,var(--clay2),var(--terr));-webkit-background-clip:text;background-clip:text}
+.sec-title.ms{color:transparent;background:linear-gradient(135deg,var(--sage),var(--moss2));-webkit-background-clip:text;background-clip:text}
+.sec-title.rd{color:transparent;background:linear-gradient(135deg,#d4624a,var(--blood));-webkit-background-clip:text;background-clip:text}
+.sec-rule{display:flex;align-items:center;gap:10px;max-width:260px;margin:12px auto}
+.sec-rule::before,.sec-rule::after{content:'';flex:1;height:1px}
+.sec-rule.oc::before,.sec-rule.oc::after{background:linear-gradient(90deg,transparent,rgba(200,136,42,.4))}
+.sec-rule.oc::after{background:linear-gradient(90deg,rgba(200,136,42,.4),transparent)}
+.sec-rule.cl::before,.sec-rule.cl::after{background:linear-gradient(90deg,transparent,rgba(196,114,42,.4))}
+.sec-rule.cl::after{background:linear-gradient(90deg,rgba(196,114,42,.4),transparent)}
+.sec-rule.ms::before,.sec-rule.ms::after{background:linear-gradient(90deg,transparent,rgba(78,120,56,.4))}
+.sec-rule.ms::after{background:linear-gradient(90deg,rgba(78,120,56,.4),transparent)}
+.sec-desc{font-family:var(--font-body);font-style:italic;color:var(--ash);font-size:.82rem;letter-spacing:1.5px;max-width:520px;margin:0 auto;line-height:1.8}
+
+/* ── CARDS ── */
+.card{
+  background:rgba(18,12,6,.9);border:1px solid rgba(200,136,42,.18);border-radius:3px;
+  padding:18px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s;
+  backdrop-filter:blur(3px);
+}
+.card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,136,42,.03),transparent 55%);pointer-events:none}
+.card:hover{border-color:rgba(200,136,42,.38);box-shadow:0 0 16px rgba(200,136,42,.07)}
+.card.cl{border-color:rgba(196,114,42,.22)}.card.cl:hover{border-color:rgba(196,114,42,.5)}
+.card.ms{border-color:rgba(78,120,56,.22)}.card.ms:hover{border-color:rgba(78,120,56,.5)}
+.card.rd{border-color:rgba(122,28,28,.25)}.card.rd:hover{border-color:rgba(122,28,28,.55)}
+.card-ttl{font-family:var(--font-title);font-size:.72rem;color:var(--ochre);letter-spacing:2px;margin-bottom:10px}
+.card-ttl.cl{color:var(--clay2)}.card-ttl.ms{color:var(--sage)}.card-ttl.rd{color:#d4624a}
+
+/* ── MISSION ── */
+.mission{
+  background:linear-gradient(135deg,rgba(28,17,7,.96),rgba(18,11,4,.96));
+  border:1px solid rgba(200,136,42,.38);border-radius:3px;
+  padding:18px 22px;margin-bottom:18px;position:relative;overflow:hidden;
+}
+.mission::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ochre),var(--clay),transparent)}
+.mission-eye{font-family:var(--font-title);font-size:.58rem;color:var(--ochre);letter-spacing:4px;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.mission-eye::before{content:'▲';font-size:.42rem}
+.mission-txt{font-size:.83rem;color:var(--parch2);line-height:1.92}
+.mission-txt strong{color:var(--gold2)}
+.mission-hl{
+  margin-top:10px;padding:9px 13px;
+  background:rgba(200,136,42,.06);border-left:3px solid var(--ochre);
+  border-radius:0 2px 2px 0;font-size:.77rem;color:var(--parch3);line-height:1.8;
+}
+.mission-hl strong{color:var(--gold2)}
+
+/* ── NARRATION ── */
+.narr-strip{
+  background:rgba(13,9,5,.82);border:1px solid rgba(200,136,42,.18);
+  border-radius:3px;padding:10px 14px;margin-bottom:14px;
+  display:flex;align-items:flex-start;gap:11px;flex-wrap:wrap;
+}
+.narr-ico{font-size:1.25rem;flex-shrink:0;margin-top:2px}
+.narr-txt{font-family:var(--font-body);font-style:italic;font-size:.78rem;color:var(--parch3);line-height:1.78;flex:1;min-width:200px}
+.btn-narr{
+  flex-shrink:0;padding:5px 12px;background:rgba(200,136,42,.08);
+  border:1px solid rgba(200,136,42,.32);border-radius:2px;
+  color:var(--ochre);font-family:var(--font-title);font-size:.62rem;
+  letter-spacing:2px;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:4px;
+}
+.btn-narr:hover{background:rgba(200,136,42,.17);border-color:var(--ochre)}
+.btn-narr.playing{border-color:var(--clay2);color:var(--clay2);animation:narrPulse 1s infinite}
+@keyframes narrPulse{0%,100%{box-shadow:0 0 4px rgba(196,114,42,.3)}50%{box-shadow:0 0 14px rgba(196,114,42,.7)}}
+.nwav{display:flex;gap:2px;align-items:center;height:10px}
+.nwav span{display:block;width:2px;border-radius:1px;background:currentColor;animation:nw .5s infinite alternate}
+.nwav span:nth-child(1){height:3px;animation-delay:0s}.nwav span:nth-child(2){height:7px;animation-delay:.1s}
+.nwav span:nth-child(3){height:10px;animation-delay:.2s}.nwav span:nth-child(4){height:5px;animation-delay:.15s}.nwav span:nth-child(5){height:3px;animation-delay:.05s}
+@keyframes nw{to{transform:scaleY(1.8)}}
+
+/* ── BUTTONS ── */
+.btn-p{
+  padding:9px 22px;background:linear-gradient(135deg,rgba(196,114,42,.7),rgba(200,136,42,.9));
+  border:1px solid var(--ochre);border-radius:2px;
+  font-family:var(--font-title);font-size:.72rem;color:var(--cave);
+  letter-spacing:2px;cursor:pointer;transition:all .3s;text-transform:uppercase;font-weight:700;
+}
+.btn-p:hover{box-shadow:0 0 18px rgba(200,136,42,.5);transform:translateY(-1px)}
+.btn-s{
+  padding:8px 18px;background:transparent;
+  border:1px solid rgba(200,136,42,.3);border-radius:2px;
+  font-family:var(--font-title);font-size:.68rem;color:var(--ash);
+  letter-spacing:2px;cursor:pointer;transition:all .3s;text-transform:uppercase;
+}
+.btn-s:hover{border-color:var(--ochre);color:var(--ochre)}
+.btn-cl{padding:8px 20px;background:rgba(196,114,42,.12);border:1px solid rgba(196,114,42,.38);border-radius:2px;font-family:var(--font-title);font-size:.68rem;color:var(--clay2);letter-spacing:2px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.btn-cl:hover{background:rgba(196,114,42,.24);box-shadow:0 0 12px rgba(196,114,42,.3)}
+.btn-ms{padding:8px 20px;background:rgba(78,120,56,.12);border:1px solid rgba(78,120,56,.38);border-radius:2px;font-family:var(--font-title);font-size:.68rem;color:var(--sage);letter-spacing:2px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.btn-ms:hover{background:rgba(78,120,56,.24);box-shadow:0 0 12px rgba(78,120,56,.3)}
+
+/* ── SECTION NAV ── */
+.snav{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:28px;padding-top:16px;
+  border-top:1px solid rgba(200,136,42,.12);flex-wrap:wrap;gap:10px;
+}
+
+/* ── ACHIEVEMENT POP ── */
+#ach-pop{
+  position:fixed;bottom:22px;right:22px;z-index:9000;
+  background:linear-gradient(135deg,rgba(13,9,6,.98),rgba(24,14,5,.98));
+  border:1px solid var(--ochre);border-radius:3px;
+  padding:12px 16px;min-width:245px;
+  box-shadow:0 0 24px rgba(200,136,42,.35),0 6px 32px rgba(0,0,0,.8);
+  transform:translateX(calc(100% + 46px));
+  transition:transform .45s cubic-bezier(.34,1.56,.64,1);
+  display:flex;align-items:center;gap:10px;
+}
+#ach-pop.show{transform:translateX(0)}
+.ap-ico{font-size:1.6rem}
+.ap-lbl{font-family:var(--font-title);font-size:.55rem;color:var(--ochre);letter-spacing:4px}
+.ap-name{font-family:var(--font-display);font-size:.72rem;color:var(--gold2);margin:2px 0}
+.ap-desc{font-size:.62rem;color:var(--ash)}
+.xpf{position:fixed;z-index:9000;font-family:var(--font-title);font-size:.9rem;color:var(--gold2);pointer-events:none;animation:xpFly 1.4s ease forwards;text-shadow:0 0 10px rgba(200,136,42,.8)}
+@keyframes xpFly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-55px) scale(1.1)}}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:6000;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal-box{background:var(--cave2);border:1px solid rgba(200,136,42,.32);border-radius:3px;padding:24px 28px;max-width:520px;width:92%;position:relative;max-height:80vh;overflow-y:auto}
+.modal-close{position:absolute;top:9px;right:11px;background:none;border:none;color:var(--ash);font-size:1rem;cursor:pointer}
+.modal-close:hover{color:var(--ochre)}
+
+/* ── WIREFRAME STYLES ── */
+#wf-wrap{position:relative;background:rgba(8,5,2,.94);border:1.5px solid rgba(200,136,42,.22);border-radius:3px;overflow:hidden;user-select:none}
+#wf-canvas{display:block;width:100%;height:500px;cursor:default}
+.wf-pal{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.wf-chip{
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;
+  border:1.5px solid rgba(200,136,42,.28);border-radius:2px;
+  background:rgba(18,12,6,.85);cursor:pointer;transition:all .22s;min-width:64px;
+}
+.wf-chip:hover{border-color:var(--ochre);transform:translateY(-2px);box-shadow:0 4px 12px rgba(200,136,42,.18)}
+.wf-chip-ico{font-size:1.1rem;pointer-events:none}
+.wf-chip-lbl{font-size:.55rem;color:var(--ash);letter-spacing:1.5px;font-family:var(--font-title);text-transform:uppercase;pointer-events:none}
+.wf-tools{display:flex;gap:7px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.wf-tool{padding:6px 13px;border-radius:2px;font-family:var(--font-title);font-size:.62rem;letter-spacing:1px;cursor:pointer;transition:all .2s;border:1px solid;background:transparent;text-transform:uppercase;display:flex;align-items:center;gap:4px}
+.wf-tool.sel-t{border-color:rgba(200,136,42,.45);color:var(--ochre)}.wf-tool.sel-t.act,.wf-tool.sel-t:hover{background:rgba(200,136,42,.12)}
+.wf-tool.draw-t{border-color:rgba(196,114,42,.4);color:var(--clay2)}.wf-tool.draw-t.act,.wf-tool.draw-t:hover{background:rgba(196,114,42,.12)}
+.wf-tool.text-t{border-color:rgba(78,120,56,.4);color:var(--sage)}.wf-tool.text-t.act,.wf-tool.text-t:hover{background:rgba(78,120,56,.12)}
+.wf-tool.era-t{border-color:rgba(122,28,28,.45);color:#d4624a}.wf-tool.era-t.act,.wf-tool.era-t:hover{background:rgba(122,28,28,.12)}
+
+/* ── COLOR PICKER ── */
+.swatch{border-radius:2px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .25s}
+.swatch:hover{transform:scale(1.07)}
+.swatch.sel{border-color:var(--gold2);box-shadow:0 0 14px rgba(200,136,42,.4)}
+.swatch-bar{height:52px}
+.swatch-lbl{font-family:var(--font-title);font-size:.57rem;text-align:center;padding:4px 3px;background:rgba(0,0,0,.5);color:var(--parch3);letter-spacing:1px}
+.cprev-wrap{border-radius:3px;overflow:hidden;border:1px solid rgba(200,136,42,.28)}
+.cprev-nav{padding:11px 15px;display:flex;align-items:center;justify-content:space-between;font-family:var(--font-display);font-size:.72rem;transition:background .4s}
+.cprev-hero{padding:20px 15px;text-align:center;transition:background .4s}
+.cprev-htitle{font-family:var(--font-display);font-size:.9rem;margin-bottom:5px;transition:color .4s}
+.cprev-body{padding:12px 15px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;transition:background .4s}
+.cprev-foot{padding:8px 15px;text-align:center;font-size:.62rem;font-family:var(--font-title);transition:background .4s}
+
+/* ── FONT CARDS ── */
+.font-card{
+  background:rgba(18,12,6,.88);border:1.5px solid rgba(200,136,42,.18);
+  border-radius:3px;padding:14px;cursor:pointer;transition:all .3s;position:relative;
+}
+.font-card:hover{border-color:rgba(200,136,42,.45);transform:translateY(-2px)}
+.font-card.sel-f{border-color:var(--gold2);background:rgba(200,136,42,.05);box-shadow:0 0 18px rgba(200,136,42,.18)}
+.font-chk{position:absolute;top:8px;right:9px;font-size:.82rem;opacity:0;transition:opacity .3s}
+.font-card.sel-f .font-chk{opacity:1}
+.font-prev{font-size:1.7rem;margin-bottom:5px;line-height:1}
+.font-name{font-family:var(--font-title);font-size:.6rem;color:var(--ochre);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.font-sample{font-size:.72rem;color:var(--ash);line-height:1.6;font-style:italic}
+
+/* ── STRUCTURE ── */
+.struct-canvas{
+  background:rgba(244,220,185,.03);border:1.5px solid rgba(200,136,42,.22);
+  border-radius:3px;min-height:340px;display:flex;flex-direction:column;gap:3px;padding:4px;
+  position:relative;overflow:hidden;
+}
+.sz{
+  border:1.5px dashed rgba(200,136,42,.28);border-radius:2px;min-height:42px;
+  display:flex;align-items:center;justify-content:center;padding:5px 10px;
+  cursor:pointer;transition:all .3s;font-family:var(--font-title);font-size:.66rem;
+  color:rgba(200,136,42,.45);letter-spacing:2px;position:relative;
+}
+.sz:hover{border-color:var(--ochre);color:var(--ochre);background:rgba(200,136,42,.03)}
+.sz.filled{border-style:solid;border-color:rgba(200,136,42,.45);color:var(--ochre);background:rgba(200,136,42,.04)}
+.sz-del{position:absolute;top:4px;right:6px;background:none;border:none;color:rgba(122,28,28,.55);cursor:pointer;font-size:.75rem}
+.sz-del:hover{color:#d4624a}
+
+/* ── FEEDBACK TRIBES ── */
+.tribe-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.tribe-card{background:rgba(18,12,6,.88);border:1px solid rgba(200,136,42,.18);border-radius:3px;padding:16px;transition:all .3s}
+.tribe-card:hover{border-color:rgba(200,136,42,.4)}
+.tribe-hdr{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.tribe-ava{font-size:1.5rem}
+.tribe-nm{font-family:var(--font-title);font-size:.7rem;color:var(--ochre);letter-spacing:2px}
+.tribe-role{font-size:.6rem;color:var(--ash);font-style:italic}
+.stars{display:flex;gap:3px;margin:5px 0}
+.star{font-size:1rem;cursor:pointer;transition:all .2s;color:var(--stone2);filter:grayscale(1)}
+.star.lit{color:var(--gold2);filter:none;text-shadow:0 0 6px rgba(200,136,42,.5)}
+.star:hover{transform:scale(1.2)}
+.fb-ta{
+  width:100%;background:rgba(13,9,5,.85);border:1px solid rgba(200,136,42,.22);
+  border-radius:2px;color:var(--parch3);font-family:var(--font-body);font-size:.77rem;
+  padding:8px 11px;outline:none;resize:vertical;min-height:60px;transition:border-color .3s;line-height:1.75;
+}
+.fb-ta:focus{border-color:var(--ochre)}
+
+/* ── BITÁCORA ── */
+.bita-bar{
+  background:rgba(13,9,5,.82);border:1px solid rgba(200,136,42,.18);
+  border-radius:2px 2px 0 0;border-bottom:none;padding:8px 12px;
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;
+}
+.tb{
+  padding:4px 10px;background:rgba(24,14,8,.85);border:1px solid rgba(200,136,42,.22);
+  border-radius:2px;color:var(--ash);font-family:var(--font-title);font-size:.62rem;
+  cursor:pointer;transition:all .2s;letter-spacing:1px;display:flex;align-items:center;gap:3px;
+}
+.tb:hover{border-color:var(--ochre);color:var(--ochre)}
+.tb.act{border-color:var(--clay2);color:var(--clay2);background:rgba(196,114,42,.12)}
+#bita-ed{
+  background:rgba(8,5,2,.93);border:1px solid rgba(200,136,42,.18);
+  border-radius:0 0 2px 2px;min-height:340px;padding:20px;
+  color:var(--parch2);font-family:var(--font-body);font-size:.85rem;line-height:1.95;
+  outline:none;overflow-y:auto;
+}
+#bita-ed:empty::before{content:'Escribe aquí tu diario de arquitecto digital… El cristal tribal recuerda cada palabra.';color:var(--smoke);font-style:italic;pointer-events:none}
+#bita-ed h3{font-family:var(--font-title);color:var(--ochre);font-size:.85rem;letter-spacing:2px;margin:8px 0 4px}
+#bita-ed b,#bita-ed strong{color:var(--gold2)}
+#bita-ed i,#bita-ed em{color:var(--ash)}
+#bita-ed img{max-width:200px;border:1px solid rgba(200,136,42,.28);border-radius:2px;margin:5px 4px}
+.bita-meta{display:flex;align-items:center;gap:12px;margin-top:9px;font-family:var(--font-title);font-size:.62rem;color:var(--smoke);flex-wrap:wrap}
+.save-dot{width:6px;height:6px;border-radius:50%;background:var(--stone2);transition:background .3s}
+.save-dot.ok{background:#55cc88;box-shadow:0 0 6px #55cc88}
+.save-dot.sv{background:var(--ochre);animation:svPulse .5s infinite alternate}
+@keyframes svPulse{to{transform:scale(1.6)}}
+.img-strip{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.img-thumb{position:relative;width:76px;height:60px;border:1px solid rgba(200,136,42,.28);border-radius:2px;overflow:hidden}
+.img-thumb img{width:100%;height:100%;object-fit:cover}
+.img-thumb .idel{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);border:none;border-radius:50%;width:15px;height:15px;color:#ff9999;cursor:pointer;font-size:.5rem;display:flex;align-items:center;justify-content:center}
+
+/* ── SHOT TRACKER ── */
+.shot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin:10px 0}
+.shot-card{background:rgba(18,12,6,.88);border:1.5px dashed rgba(200,136,42,.22);border-radius:3px;padding:14px;text-align:center;cursor:pointer;transition:all .3s;position:relative}
+.shot-card:hover{border-color:rgba(200,136,42,.5);border-style:solid}
+.shot-card.done{border-style:solid;border-color:rgba(78,120,56,.5);background:rgba(78,120,56,.04)}
+.shot-card.done::after{content:'✓';position:absolute;top:6px;right:8px;color:var(--sage);font-size:.82rem}
+.shot-ico{font-size:1.9rem;margin-bottom:6px;display:block}
+.shot-ttl{font-family:var(--font-title);font-size:.6rem;color:var(--ochre);letter-spacing:2px;margin-bottom:4px}
+.shot-desc{font-size:.63rem;color:var(--ash);line-height:1.5}
+
+/* ── DECISION LOG ── */
+.dec-log{background:rgba(8,5,2,.85);border:1px solid rgba(200,136,42,.18);border-radius:2px;padding:12px;max-height:200px;overflow-y:auto;font-family:var(--font-mono);font-size:.69rem;line-height:1.85;color:var(--parch3)}
+.dec{border-bottom:1px solid rgba(200,136,42,.07);padding:4px 0}
+.dec:last-child{border-bottom:none}
+.dec-t{color:var(--smoke);font-size:.6rem}.dec-c{color:var(--ochre);margin-right:4px}
+
+/* ── RANGE / INPUT ── */
+input[type=range]{-webkit-appearance:none;height:3px;background:rgba(200,136,42,.18);border-radius:2px;cursor:pointer;width:100%}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:linear-gradient(135deg,var(--clay2),var(--gold2));cursor:pointer;box-shadow:0 0 6px rgba(200,136,42,.45)}
+
+/* ── FINAL ── */
+#final{display:none;position:fixed;inset:0;z-index:4000;background:radial-gradient(ellipse at 50% 65%,rgba(196,114,42,.18),var(--cave) 60%);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px}
+
+/* ── MISC ── */
+input[type=color]{width:42px;height:32px;border:1px solid rgba(200,136,42,.28);border-radius:2px;background:none;cursor:pointer;padding:2px}
+kbd{background:rgba(255,255,255,.07);padding:1px 7px;border-radius:2px;font-size:.68rem;font-family:var(--font-mono)}
+@media(max-width:680px){.sec{padding:14px}.struct-canvas{min-height:240px}#sidebar{width:38px}#main{margin-left:38px}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="ld-glyph">🪨</div>
+  <div class="ld-text">TALLANDO EL PORTAL TRIBAL...</div>
+  <div class="ld-bar"><div class="ld-fill" id="lf"></div></div>
+</div>
+
+<!-- ═══════════ CINEMATIC ═══════════ -->
+<div id="cinematic">
+  <div class="cin-cave-top"></div>
+  <div class="cin-cave-bot"></div>
+  <div class="cin-torch left"></div>
+  <div class="cin-torch right"></div>
+  <!-- Central fire glow -->
+  <div style="position:absolute;bottom:155px;left:50%;transform:translateX(-50%);width:500px;height:240px;background:radial-gradient(ellipse at 50% 100%,rgba(196,114,42,.2),transparent 65%);pointer-events:none;animation:torchGlow 2s infinite alternate"></div>
+  <!-- Cave fire SVG -->
+  <div style="position:absolute;bottom:148px;left:50%;transform:translateX(-50%);z-index:2">
+    <svg width="80" height="60" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="fg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fffaa0"/>
+          <stop offset="30%" stop-color="#ff8800"/>
+          <stop offset="100%" stop-color="#c04000" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="40" cy="54" rx="28" ry="6" fill="rgba(196,114,42,.65)"><animate attributeName="opacity" values=".5;.9;.5" dur="2s" repeatCount="indefinite"/></ellipse>
+      <rect x="16" y="48" width="48" height="8" rx="3" fill="#2e1206"/>
+      <rect x="12" y="46" width="52" height="8" rx="3" fill="#3a1808" transform="rotate(-10,38,50)"/>
+      <path d="M40 44 Q32 32 36 17 Q34 27 40 24 Q42 15 45 22 Q48 11 43 26 Q47 23 42 40Z" fill="url(#fg)" opacity=".92"><animate attributeName="d" dur=".38s" repeatCount="indefinite" values="M40 44 Q32 32 36 17 Q34 27 40 24 Q42 15 45 22 Q48 11 43 26 Q47 23 42 40Z;M40 44 Q34 34 38 19 Q35 29 41 26 Q43 17 46 24 Q49 13 44 28 Q48 25 43 41Z;M40 44 Q32 32 36 17 Q34 27 40 24 Q42 15 45 22 Q48 11 43 26 Q47 23 42 40Z"/></path>
+      <path d="M38 44 Q28 36 32 23 Q30 30 35 28 Q37 20 39 26Z" fill="#ff7700" opacity=".65"><animate attributeName="d" dur=".32s" repeatCount="indefinite" values="M38 44 Q28 36 32 23 Q30 30 35 28 Q37 20 39 26Z;M38 44 Q30 38 34 25 Q31 32 36 30 Q38 22 40 28Z;M38 44 Q28 36 32 23 Q30 30 35 28 Q37 20 39 26Z"/></path>
+    </svg>
+  </div>
+  <!-- Cave painting left -->
+  <svg style="position:absolute;left:5%;top:28%;width:110px;height:100px;opacity:.3" viewBox="0 0 110 100">
+    <g stroke="#8b5a20" stroke-width="1.2" fill="none" opacity=".8">
+      <!-- handprint -->
+      <ellipse cx="44" cy="70" rx="19" ry="14" fill="#7a4a18" opacity=".4"/>
+      <ellipse cx="33" cy="57" rx="4.5" ry="11" fill="#7a4a18" opacity=".35" transform="rotate(-12,33,57)"/>
+      <ellipse cx="41" cy="54" rx="4.5" ry="12" fill="#7a4a18" opacity=".35" transform="rotate(-3,41,54)"/>
+      <ellipse cx="50" cy="54" rx="4.5" ry="12" fill="#7a4a18" opacity=".35"/>
+      <ellipse cx="58" cy="56" rx="4" ry="10" fill="#7a4a18" opacity=".35" transform="rotate(9,58,56)"/>
+      <!-- buffalo -->
+      <path d="M60 38 Q72 28 88 30 Q100 32 104 43 Q106 51 95 54 Q102 58 99 65 Q92 67 84 60 Q74 64 62 62 Q54 54 54 38Z"/>
+      <circle cx="102" cy="38" r="3.5" fill="#8b5a20" opacity=".5"/>
+    </g>
+  </svg>
+  <!-- Cave painting right -->
+  <svg style="position:absolute;right:5%;top:30%;width:100px;height:90px;opacity:.28" viewBox="0 0 100 90">
+    <g stroke="#9a6228" stroke-width="1.2" fill="none">
+      <circle cx="50" cy="18" r="7"/>
+      <line x1="50" y1="25" x2="50" y2="50"/>
+      <line x1="50" y1="36" x2="36" y2="46"/>
+      <line x1="50" y1="36" x2="66" y2="44"/>
+      <line x1="50" y1="50" x2="40" y2="68"/>
+      <line x1="50" y1="50" x2="62" y2="66"/>
+      <line x1="66" y1="44" x2="86" y2="28"/>
+      <polygon points="86,28 82,22 90,24" fill="#9a6228" opacity=".6"/>
+    </g>
+  </svg>
+  <div id="cin-content">
+    <div class="cin-ep">▲ Academia de Arquitectura Digital ▲</div>
+    <h1 class="cin-h1">
+      <span>COMUNICAR</span>
+      <span>Arquitectos Digitales de la Tribu</span>
+    </h1>
+    <p class="cin-sub">~ donde la piedra tallada se convierte en diseño ~</p>
+    <div class="cin-scroll">
+      <p class="cin-story">La tribu <strong>WIRA</strong> ha sobrevivido al invierno más duro. Sus guerreros son valientes, sus artesanos hábiles, sus chamanes sabios. Pero el mundo digital no los conoce. Los ancianos han visto en las llamas una visión: un <strong>portal web</strong> que comunique quiénes son, qué hacen y qué sueñan. Tú, joven <strong>Arquitecto Digital</strong>, has sido elegido por el Tótem del Conocimiento para diseñarlo. Domina los fundamentos del diseño web y crea algo que ninguna tribu ha logrado antes.</p>
+    </div>
+    <button class="btn-enter" onclick="startGame()">🔥 Comenzar Diseño 🔥</button>
+  </div>
+  <div id="embers"></div>
+</div>
+
+<!-- ACHIEVEMENT POP -->
+<div id="ach-pop">
+  <span class="ap-ico" id="ap-ico">🏆</span>
+  <div>
+    <div class="ap-lbl">✦ Insignia Tribal ✦</div>
+    <div class="ap-name" id="ap-name">—</div>
+    <div class="ap-desc" id="ap-desc">—</div>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-bg" id="help-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('help-modal').classList.remove('open')">✕</button>
+    <h3 style="font-family:var(--font-title);color:var(--ochre);font-size:.82rem;margin-bottom:12px;letter-spacing:2px" id="help-ttl"></h3>
+    <div id="help-body" style="font-size:.78rem;color:var(--parch3);line-height:1.88"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app">
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-brand">🪨 COMUNICAR</div>
+  <div class="hud-sep"></div>
+  <div id="badge-row" class="badge-row">
+    <span class="bdg" id="b0" data-tip="Arquitecto Aprendiz">🗿</span>
+    <span class="bdg" id="b1" data-tip="Tejedor de Wireframes">🕸️</span>
+    <span class="bdg" id="b2" data-tip="Guardián de Colores">🎨</span>
+    <span class="bdg" id="b3" data-tip="Maestro Tipográfico">✍️</span>
+    <span class="bdg" id="b4" data-tip="Constructor de Estructuras">🏗️</span>
+    <span class="bdg" id="b5" data-tip="Diplomático Tribal">🤝</span>
+    <span class="bdg" id="b6" data-tip="Cronista Ancestral">📜</span>
+    <span class="bdg" id="b7" data-tip="Gran Arquitecto Digital">👑</span>
+  </div>
+  <div class="hud-sep"></div>
+  <div class="hud-stat">⚡ <span class="hud-val" id="xp-disp">0</span></div>
+  <div id="xp-track"><div id="xp-bar" style="width:0%"></div></div>
+  <div id="lvl-gem" title="Nivel actual">1</div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sdot on" id="sd0" onclick="goSec(0)" title="">📖<span class="stt">Historia</span></div>
+  <div class="svr"></div>
+  <div class="sdot" id="sd1" onclick="goSec(1)">🌐<span class="stt">Diseño Web</span></div>
+  <div class="svr"></div>
+  <div class="sdot" id="sd2" onclick="goSec(2)">🕸️<span class="stt">Wireframes</span></div>
+  <div class="svr"></div>
+  <div class="sdot" id="sd3" onclick="goSec(3)">🎨<span class="stt">Colores</span></div>
+  <div class="svr"></div>
+  <div class="sdot" id="sd4" onclick="goSec(4)">✍️<span class="stt">Tipografías</span></div>
+  <div class="svr"></div>
+  <div class="sdot" id="sd5" onclick="goSec(5)">🏗️<span class="stt">Estructura</span></div>
+  <div class="svr"></div>
+  <div class="sdot" id="sd6" onclick="goSec(6)">🤝<span class="stt">Feedback</span></div>
+  <div class="svr"></div>
+  <div class="sdot" id="sd7" onclick="goSec(7)">📜<span class="stt">Bitácora</span></div>
+</div>
+
+<!-- ═════ MAIN ═════ -->
+<div id="main">
+<!-- ══════ SEC 0 – HISTORIA ══════ -->
+<section class="sec on" id="sec-0">
+<div style="max-width:860px;margin:0 auto">
+  <div class="sec-head">
+    <div class="sec-ep">Capítulo I · El Llamado del Portal</div>
+    <h2 class="sec-title oc">Historia Inicial</h2>
+    <div class="sec-rule oc"><span>🔥</span></div>
+    <p class="sec-desc">Cada gran obra comienza con una necesidad. La tribu WIRA te necesita.</p>
+  </div>
+
+  <!-- Scene illustration -->
+  <div style="position:relative;border-radius:3px;overflow:hidden;border:1px solid rgba(200,136,42,.28);margin-bottom:18px">
+    <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+      <defs>
+        <radialGradient id="sg" cx="50%" cy="60%" r="55%"><stop offset="0%" stop-color="#281505"/><stop offset="100%" stop-color="#0d0906"/></radialGradient>
+        <radialGradient id="fgr" cx="50%" cy="100%" r="50%"><stop offset="0%" stop-color="rgba(196,114,42,.5)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <rect width="900" height="260" fill="url(#sg)"/>
+      <!-- Stars -->
+      <circle cx="80" cy="28" r="1.1" fill="white" opacity=".7"/><circle cx="220" cy="18" r=".9" fill="white" opacity=".6"/>
+      <circle cx="380" cy="32" r="1.3" fill="white" opacity=".8"/><circle cx="620" cy="15" r="1" fill="white" opacity=".7"/>
+      <circle cx="770" cy="28" r="1.1" fill="white" opacity=".6"/><circle cx="840" cy="42" r=".9" fill="white" opacity=".8"/>
+      <!-- Ground -->
+      <rect x="0" y="208" width="900" height="52" fill="#180e04"/>
+      <rect x="0" y="203" width="900" height="7" fill="#1e1205"/>
+      <!-- Huts left -->
+      <rect x="35" y="162" width="78" height="48" fill="#1c1105" stroke="#261608" stroke-width="1"/>
+      <polygon points="35,162 74,133 113,162" fill="#281808"/>
+      <rect x="62" y="180" width="22" height="30" fill="#120d04"/>
+      <!-- Huts right -->
+      <rect x="787" y="163" width="75" height="46" fill="#1c1105" stroke="#261608" stroke-width="1"/>
+      <polygon points="787,163 824,136 862,163" fill="#281808"/>
+      <!-- Totem center -->
+      <rect x="443" y="98" width="18" height="112" rx="2" fill="#180e04" stroke="#261608" stroke-width="1"/>
+      <polygon points="452,75 464,98 452,105 440,98" fill="rgba(200,136,42,.55)" stroke="rgba(200,136,42,.9)" stroke-width="1.5" filter="url(#glow)"><animate attributeName="opacity" values=".7;1;.7" dur="1.8s" repeatCount="indefinite"/></polygon>
+      <ellipse cx="452" cy="95" rx="28" ry="16" fill="url(#fgr)" opacity=".65"><animate attributeName="opacity" values=".45;.85;.45" dur="2.3s" repeatCount="indefinite"/></ellipse>
+      <!-- Torches -->
+      <rect x="296" y="172" width="4" height="38" rx="1" fill="#1e1205"/>
+      <ellipse cx="298" cy="169" rx="4.5" ry="7" fill="#ff6600" opacity=".88"><animate attributeName="ry" values="7;11;7" dur=".38s" repeatCount="indefinite"/></ellipse>
+      <ellipse cx="298" cy="169" rx="16" ry="20" fill="rgba(196,114,42,.14)" filter="url(#glow)"/>
+      <rect x="600" y="172" width="4" height="38" rx="1" fill="#1e1205"/>
+      <ellipse cx="602" cy="169" rx="4.5" ry="7" fill="#ff6600" opacity=".88"><animate attributeName="ry" values="7;10;7" dur=".42s" repeatCount="indefinite"/></ellipse>
+      <ellipse cx="602" cy="169" rx="16" ry="20" fill="rgba(196,114,42,.14)" filter="url(#glow)"/>
+      <!-- Tribal figures -->
+      <circle cx="355" cy="200" r="7" fill="#160c03"/><rect x="349" y="207" width="12" height="18" rx="2" fill="#160c03"/>
+      <circle cx="452" cy="196" r="9" fill="#160c03"/><rect x="445" y="205" width="14" height="20" rx="2" fill="#160c03"/>
+      <circle cx="548" cy="200" r="7" fill="#160c03"/><rect x="542" y="207" width="12" height="18" rx="2" fill="#160c03"/>
+      <!-- Cave paintings -->
+      <g opacity=".22" stroke="#9a7030" stroke-width="1.1" fill="none">
+        <path d="M150 95 Q165 82 184 87 Q193 99 183 106 Q168 111 153 104Z"/>
+        <line x1="170" y1="106" x2="165" y2="125"/><line x1="180" y1="106" x2="186" y2="123"/>
+      </g>
+      <!-- Title overlay -->
+      <text x="452" y="50" text-anchor="middle" fill="rgba(200,136,42,.4)" font-family="Cinzel Decorative,serif" font-size="13" letter-spacing="4">Aldea de la Tribu WIRA</text>
+    </svg>
+    <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0,rgba(13,9,6,.95),transparent);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <p style="font-size:.7rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">La tribu WIRA tiene una historia que contar al mundo digital</p>
+      <button class="btn-narr" id="nb-hist" onclick="narr('nt-hist','nb-hist')">🔊 <span>Narrar</span><span class="nwav" id="nw-hist" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></button>
+    </div>
+  </div>
+  <span id="nt-hist" style="display:none">La tribu Wira ha sobrevivido al invierno más duro. Sus guerreros son valientes, sus artesanos hábiles, sus chamanes sabios. Pero el mundo digital no los conoce. Los ancianos han visto en las llamas una visión: un portal web que comunique quiénes son, qué hacen y qué sueñan. Tú, joven Arquitecto Digital, has sido elegido por el Tótem del Conocimiento para diseñarlo.</span>
+
+  <div class="mission">
+    <div class="mission-eye">TU GRAN MISIÓN</div>
+    <p class="mission-txt">Durante este viaje aprenderás los fundamentos del <strong>diseño web UX/UI</strong> y aplicarás cada concepto en el portal real de la tribu WIRA. Diseñarás wireframes, elegirás colores y tipografías, construirás la estructura y recibirás retroalimentación de otras tribus.</p>
+    <div class="mission-hl"><strong>📸 Recuerda:</strong> En cada sección toma <strong>pantallazo</strong> de tu trabajo y súbelo a tu <strong>bitácora digital</strong> (Google Docs, Padlet, Notion, etc.).</div>
+  </div>
+
+  <!-- Role selection -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-ttl">🗿 Elige tu Rol de Arquitecto</div>
+    <p style="font-size:.73rem;color:var(--ash);margin-bottom:12px;font-family:var(--font-body)">Cada arquitecto tiene una visión diferente. ¿Cuál es la tuya?</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px" id="char-grid">
+      <div class="card cl" style="cursor:pointer;text-align:center;padding:14px 10px" onclick="pickChar(0,'Diseñador Visual')">
+        <div style="font-size:1.8rem;margin-bottom:6px">🎨</div>
+        <div style="font-family:var(--font-title);font-size:.62rem;color:var(--clay2);letter-spacing:2px;margin-bottom:4px">VISUAL</div>
+        <div style="font-size:.62rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">Domina colores y formas.</div>
+      </div>
+      <div class="card" style="cursor:pointer;text-align:center;padding:14px 10px" onclick="pickChar(1,'Arquitecto de Información')">
+        <div style="font-size:1.8rem;margin-bottom:6px">🏗️</div>
+        <div style="font-family:var(--font-title);font-size:.62rem;color:var(--ochre);letter-spacing:2px;margin-bottom:4px">ESTRUCTURAL</div>
+        <div style="font-size:.62rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">Organiza con precisión.</div>
+      </div>
+      <div class="card ms" style="cursor:pointer;text-align:center;padding:14px 10px" onclick="pickChar(2,'UX Researcher')">
+        <div style="font-size:1.8rem;margin-bottom:6px">🔍</div>
+        <div style="font-family:var(--font-title);font-size:.62rem;color:var(--sage);letter-spacing:2px;margin-bottom:4px">INVESTIGADOR</div>
+        <div style="font-size:.62rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">El usuario primero.</div>
+      </div>
+      <div class="card rd" style="cursor:pointer;text-align:center;padding:14px 10px" onclick="pickChar(3,'Prototipador Ágil')">
+        <div style="font-size:1.8rem;margin-bottom:6px">⚡</div>
+        <div style="font-family:var(--font-title);font-size:.62rem;color:#d4624a;letter-spacing:2px;margin-bottom:4px">ÁGIL</div>
+        <div style="font-size:.62rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">Crea rápido, itera.</div>
+      </div>
+    </div>
+    <div id="char-msg" style="font-size:.72rem;color:var(--ash);margin-top:8px;text-align:center;font-style:italic;font-family:var(--font-body)"></div>
+  </div>
+
+  <!-- Roadmap -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:18px">
+    <div class="card" style="cursor:pointer;text-align:center;border-left:3px solid var(--ochre)" onclick="goSec(1)"><div style="font-size:1.4rem;margin-bottom:6px">🌐</div><div class="card-ttl" style="font-size:.6rem">Diseño Web</div><div style="font-size:.62rem;color:var(--smoke)">Fundamentos del diseño digital</div></div>
+    <div class="card cl" style="cursor:pointer;text-align:center;border-left:3px solid var(--clay2)" onclick="goSec(2)"><div style="font-size:1.4rem;margin-bottom:6px">🕸️</div><div class="card-ttl cl" style="font-size:.6rem">Wireframes</div><div style="font-size:.62rem;color:var(--smoke)">Boceto de la estructura</div></div>
+    <div class="card rd" style="cursor:pointer;text-align:center;border-left:3px solid #d4624a" onclick="goSec(3)"><div style="font-size:1.4rem;margin-bottom:6px">🎨</div><div class="card-ttl rd" style="font-size:.6rem">Colores</div><div style="font-size:.62rem;color:var(--smoke)">Paleta de la tribu</div></div>
+    <div class="card" style="cursor:pointer;text-align:center;border-left:3px solid var(--ash)" onclick="goSec(4)"><div style="font-size:1.4rem;margin-bottom:6px">✍️</div><div class="card-ttl" style="font-size:.6rem;color:var(--bone)">Tipografía</div><div style="font-size:.62rem;color:var(--smoke)">La voz visual</div></div>
+    <div class="card ms" style="cursor:pointer;text-align:center;border-left:3px solid var(--moss2)" onclick="goSec(5)"><div style="font-size:1.4rem;margin-bottom:6px">🏗️</div><div class="card-ttl ms" style="font-size:.6rem">Estructura</div><div style="font-size:.62rem;color:var(--smoke)">Diseño final</div></div>
+    <div class="card" style="cursor:pointer;text-align:center;border-left:3px solid var(--sage)" onclick="goSec(6)"><div style="font-size:1.4rem;margin-bottom:6px">🤝</div><div class="card-ttl ms" style="font-size:.6rem">Feedback</div><div style="font-size:.62rem;color:var(--smoke)">Consejo inter-tribal</div></div>
+  </div>
+
+  <div class="snav">
+    <div style="font-size:.68rem;color:var(--smoke);font-family:var(--font-title)">🪨 El tótem aguarda</div>
+    <button class="btn-p" onclick="doneSec(0);goSec(1)">Comenzar → Diseño Web</button>
+  </div>
+</div>
+</section>
+<!-- ══════ SEC 1 – INTRO DISEÑO WEB ══════ -->
+<section class="sec" id="sec-1">
+<div style="max-width:880px;margin:0 auto">
+  <div class="sec-head">
+    <div class="sec-ep">Capítulo II · Los Cuatro Pilares del Portal</div>
+    <h2 class="sec-title oc">Introducción al Diseño Web</h2>
+    <div class="sec-rule oc"><span>🌐</span></div>
+    <p class="sec-desc">Antes de tallar la roca, el arquitecto entiende sus herramientas.</p>
+  </div>
+  <div class="mission">
+    <div class="mission-eye">TU MISIÓN</div>
+    <p class="mission-txt">Explora los <strong>4 pilares del diseño web</strong>. Para cada uno: expándelo, lee con atención y responde la pregunta de reflexión con tu propio criterio. No hay respuesta incorrecta — lo importante es tu pensamiento de diseñador.</p>
+    <div class="mission-hl"><strong>📸 Evidencia:</strong> Pantallazo con los 4 pilares expandidos y tus reflexiones. Sube a tu bitácora digital.</div>
+  </div>
+  <div class="narr-strip">
+    <span class="narr-ico">🗿</span>
+    <p class="narr-txt" id="nt-intro">El Gran Arquitecto Watan enseña: "Todo portal tiene cuatro columnas como los tótems sagrados: la estructura que sostiene, la apariencia que atrae, la usabilidad que guía, y el contenido que comunica. Sin una de ellas, el portal se derrumba."</p>
+    <button class="btn-narr" id="nb-intro" onclick="narr('nt-intro','nb-intro')">🔊<span class="nwav" id="nw-intro" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></button>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:18px">
+    <!-- Pilar 1 -->
+    <div id="pi0">
+      <div onclick="togglePilar(0)" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 17px;background:rgba(18,12,6,.9);border:1px solid rgba(200,136,42,.28);border-radius:3px;transition:all .3s">
+        <span style="font-size:1.4rem">🏛️</span>
+        <div style="flex:1">
+          <div style="font-family:var(--font-title);font-size:.76rem;color:var(--ochre);letter-spacing:2px">ESTRUCTURA (HTML)</div>
+          <div style="font-size:.67rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">Los huesos del portal — el esqueleto que sostiene todo</div>
+        </div>
+        <span id="pa0" style="color:var(--ochre);transition:transform .3s">▼</span>
+      </div>
+      <div id="pb0" style="display:none;background:rgba(14,9,4,.92);border:1px solid rgba(200,136,42,.18);border-top:none;border-radius:0 0 3px 3px;padding:16px">
+        <p style="font-size:.81rem;color:var(--parch2);line-height:1.92;margin-bottom:11px">HTML (HyperText Markup Language) define <strong style="color:var(--gold2)">qué elementos existen</strong> en la página: encabezados, párrafos, imágenes, botones, formularios. Es el plano de la aldea digital: indica dónde va cada choza, cada camino y cada fuente de agua.</p>
+        <div style="background:rgba(8,5,2,.8);border-left:3px solid var(--ochre);padding:9px 13px;border-radius:0 2px 2px 0;font-family:var(--font-mono);font-size:.72rem;color:var(--parch2);line-height:1.85;margin-bottom:11px">&lt;<span style="color:var(--clay2)">nav</span>&gt; Barra de navegación &lt;/<span style="color:var(--clay2)">nav</span>&gt;<br>&lt;<span style="color:var(--clay2)">main</span>&gt; Contenido principal &lt;/<span style="color:var(--clay2)">main</span>&gt;<br>&lt;<span style="color:var(--clay2)">footer</span>&gt; Pie del portal &lt;/<span style="color:var(--clay2)">footer</span>&gt;</div>
+        <label style="font-family:var(--font-title);font-size:.6rem;color:var(--ochre);letter-spacing:2px;display:block;margin-bottom:6px">🔥 REFLEXIÓN: ¿Qué secciones necesita el portal de la tribu WIRA?</label>
+        <textarea class="fb-ta" style="min-height:50px" oninput="savePN(0,this.value)" placeholder="Escribe tus ideas..."></textarea>
+      </div>
+    </div>
+    <!-- Pilar 2 -->
+    <div id="pi1">
+      <div onclick="togglePilar(1)" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 17px;background:rgba(18,12,6,.9);border:1px solid rgba(196,114,42,.28);border-radius:3px;transition:all .3s">
+        <span style="font-size:1.4rem">🎨</span>
+        <div style="flex:1">
+          <div style="font-family:var(--font-title);font-size:.76rem;color:var(--clay2);letter-spacing:2px">APARIENCIA (CSS)</div>
+          <div style="font-size:.67rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">La piel del portal — colores, formas y belleza visual</div>
+        </div>
+        <span id="pa1" style="color:var(--clay2);transition:transform .3s">▼</span>
+      </div>
+      <div id="pb1" style="display:none;background:rgba(14,9,4,.92);border:1px solid rgba(196,114,42,.18);border-top:none;border-radius:0 0 3px 3px;padding:16px">
+        <p style="font-size:.81rem;color:var(--parch2);line-height:1.92;margin-bottom:11px">CSS (Cascading Style Sheets) define cómo <strong style="color:var(--clay2)">luce</strong> cada elemento: colores, tamaños, fuentes, espacios, animaciones. Es como los pigmentos tribales que pintan las paredes de la cueva, dándole identidad y carácter al portal.</p>
+        <div style="display:flex;gap:7px;margin-bottom:11px;flex-wrap:wrap">
+          <div style="padding:7px 13px;border-radius:2px;font-size:.7rem;font-family:var(--font-title);background:#c4622a;color:white">color: #c4622a</div>
+          <div style="padding:7px 13px;border-radius:2px;font-size:.7rem;font-family:var(--font-title);background:#3a5c2a;color:white">background: #3a5c2a</div>
+          <div style="padding:7px 13px;border-radius:2px;font-size:.7rem;font-family:var(--font-title);background:#1a1008;color:#f2deb8;border:1px solid #6b5030">border: 1px solid</div>
+        </div>
+        <label style="font-family:var(--font-title);font-size:.6rem;color:var(--clay2);letter-spacing:2px;display:block;margin-bottom:6px">🔥 REFLEXIÓN: ¿Qué colores representan a tu tribu y por qué?</label>
+        <textarea class="fb-ta" style="min-height:50px" oninput="savePN(1,this.value)" placeholder="Escribe tus ideas..."></textarea>
+      </div>
+    </div>
+    <!-- Pilar 3 -->
+    <div id="pi2">
+      <div onclick="togglePilar(2)" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 17px;background:rgba(18,12,6,.9);border:1px solid rgba(78,120,56,.28);border-radius:3px;transition:all .3s">
+        <span style="font-size:1.4rem">👆</span>
+        <div style="flex:1">
+          <div style="font-family:var(--font-title);font-size:.76rem;color:var(--sage);letter-spacing:2px">USABILIDAD (UX)</div>
+          <div style="font-size:.67rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">El camino del portal — que sea fácil de usar para todos</div>
+        </div>
+        <span id="pa2" style="color:var(--sage);transition:transform .3s">▼</span>
+      </div>
+      <div id="pb2" style="display:none;background:rgba(14,9,4,.92);border:1px solid rgba(78,120,56,.18);border-top:none;border-radius:0 0 3px 3px;padding:16px">
+        <p style="font-size:.81rem;color:var(--parch2);line-height:1.92;margin-bottom:11px">UX (User Experience) es el arte de diseñar <strong style="color:var(--sage)">experiencias que funcionan</strong>: botones claros, menús que se encuentran, flujos que no confunden. Como los senderos tribales que siempre llevan al agua: intuitivos y sin obstáculos.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px">
+          <div style="background:rgba(78,120,56,.08);border:1px solid rgba(78,120,56,.3);border-radius:2px;padding:9px;font-size:.7rem;color:var(--parch3);line-height:1.6"><strong style="color:var(--sage)">✓ Buena UX:</strong><br>Botón "Contactar" visible y grande</div>
+          <div style="background:rgba(122,28,28,.08);border:1px solid rgba(122,28,28,.3);border-radius:2px;padding:9px;font-size:.7rem;color:var(--parch3);line-height:1.6"><strong style="color:#d4624a">✗ Mala UX:</strong><br>Menú escondido en letra minúscula</div>
+        </div>
+        <label style="font-family:var(--font-title);font-size:.6rem;color:var(--sage);letter-spacing:2px;display:block;margin-bottom:6px">🔥 REFLEXIÓN: ¿Qué necesita encontrar fácilmente un visitante de tu tribu?</label>
+        <textarea class="fb-ta" style="min-height:50px" oninput="savePN(2,this.value)" placeholder="Escribe tus ideas..."></textarea>
+      </div>
+    </div>
+    <!-- Pilar 4 -->
+    <div id="pi3">
+      <div onclick="togglePilar(3)" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 17px;background:rgba(18,12,6,.9);border:1px solid rgba(200,160,80,.25);border-radius:3px;transition:all .3s">
+        <span style="font-size:1.4rem">📜</span>
+        <div style="flex:1">
+          <div style="font-family:var(--font-title);font-size:.76rem;color:var(--bone);letter-spacing:2px">CONTENIDO (UX WRITING)</div>
+          <div style="font-size:.67rem;color:var(--ash);font-style:italic;font-family:var(--font-body)">La voz del portal — las palabras que comunican</div>
+        </div>
+        <span id="pa3" style="color:var(--bone);transition:transform .3s">▼</span>
+      </div>
+      <div id="pb3" style="display:none;background:rgba(14,9,4,.92);border:1px solid rgba(200,160,80,.16);border-top:none;border-radius:0 0 3px 3px;padding:16px">
+        <p style="font-size:.81rem;color:var(--parch2);line-height:1.92;margin-bottom:11px">El contenido es <strong style="color:var(--bone)">lo que comunicamos</strong>: títulos que enganchan, descripciones que convencen, llamadas a la acción que motivan. Como los cuentos del anciano alrededor del fuego: deben ser claros, emocionantes y verdaderos.</p>
+        <div style="background:rgba(200,160,80,.04);border-left:3px solid var(--bone);padding:9px 13px;border-radius:0 2px 2px 0;font-family:var(--font-body);font-size:.77rem;color:var(--parch2);line-height:1.85;margin-bottom:11px;font-style:italic">"Somos la Tribu WIRA: guardianes del bosque ancestral. Nuestros artesanos crean herramientas que duran generaciones. Únete a nuestra misión de preservar lo antiguo en el mundo moderno."</div>
+        <label style="font-family:var(--font-title);font-size:.6rem;color:var(--bone);letter-spacing:2px;display:block;margin-bottom:6px">🔥 REFLEXIÓN: Escribe el slogan o frase principal para el portal de tu tribu.</label>
+        <textarea class="fb-ta" style="min-height:50px" oninput="savePN(3,this.value)" placeholder="Tu slogan aquí..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="snav">
+    <button class="btn-s" onclick="goSec(0)">← Anterior</button>
+    <button class="btn-p" onclick="doneSec(1);goSec(2)">Siguiente → Wireframes</button>
+  </div>
+</div>
+</section>
+<!-- ══════ SEC 2 – WIREFRAMES ══════ -->
+<section class="sec" id="sec-2">
+<div style="max-width:1000px;margin:0 auto">
+  <div class="sec-head">
+    <div class="sec-ep">Capítulo III · El Boceto Sagrado</div>
+    <h2 class="sec-title cl">Constructor de Wireframes</h2>
+    <div class="sec-rule cl"><span>🕸️</span></div>
+    <p class="sec-desc">Antes de construir la aldea, el arquitecto dibuja en la piedra.</p>
+  </div>
+  <div class="mission">
+    <div class="mission-eye">TU MISIÓN</div>
+    <p class="mission-txt">Diseña el wireframe del portal de la tribu WIRA. Un wireframe es un boceto esquemático — sin colores ni estilos finales — que muestra <strong>dónde irá cada elemento</strong>. Coloca al menos <strong>6 componentes</strong> diferentes y organízalos con lógica de navegación.</p>
+    <div class="mission-hl"><strong>📸 Evidencia:</strong> Pantallazo del wireframe completo con al menos 6 componentes. Sube a tu bitácora digital.</div>
+  </div>
+  <div class="narr-strip">
+    <span class="narr-ico">✏️</span>
+    <p class="narr-txt" id="nt-wf">La grabadora Skara declara: "El wireframe es el mapa de la aldea digital. No importa que sea perfecto — importa que muestre la idea. Arrastra componentes al lienzo, organízalos con lógica y construye la estructura de tu portal."</p>
+    <button class="btn-narr" id="nb-wf" onclick="narr('nt-wf','nb-wf')">🔊<span class="nwav" id="nw-wf" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></button>
+  </div>
+
+  <!-- Component Palette -->
+  <div class="card cl" style="margin-bottom:12px">
+    <div class="card-ttl cl">🧱 Componentes — Clic para añadir al lienzo</div>
+    <div class="wf-pal" id="wf-pal" style="margin-top:9px"></div>
+  </div>
+
+  <!-- Tools -->
+  <div class="wf-tools">
+    <button class="wf-tool sel-t act" id="wt-sel" onclick="setWFT('sel')">↖ Seleccionar</button>
+    <button class="wf-tool draw-t" id="wt-drw" onclick="setWFT('drw')">✏️ Dibujar</button>
+    <button class="wf-tool text-t" id="wt-txt" onclick="setWFT('txt')">T Texto</button>
+    <button class="wf-tool era-t" id="wt-era" onclick="setWFT('era')">✕ Eliminar</button>
+    <button class="btn-s" style="font-size:.6rem;padding:5px 11px;margin-left:auto" onclick="clearWF()">↺ Limpiar</button>
+    <button class="btn-s" style="font-size:.6rem;padding:5px 11px" onclick="showHelp('wf')">❓ Ayuda</button>
+    <span style="font-size:.65rem;color:var(--ash);font-family:var(--font-title);align-self:center">Elementos: <span id="wf-cnt" style="color:var(--ochre)">0</span></span>
+  </div>
+
+  <!-- Canvas -->
+  <div id="wf-wrap" style="margin-bottom:13px">
+    <div id="wf-empty" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;opacity:.45;transition:opacity .4s;z-index:1">
+      <span style="font-size:2.8rem">🕸️</span>
+      <p style="font-family:var(--font-title);font-size:.75rem;color:var(--ash);letter-spacing:2px;text-align:center">Haz clic en los componentes de arriba para añadirlos</p>
+    </div>
+    <svg id="wf-svg" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:500px">
+      <defs><pattern id="gdots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="14" cy="14" r=".9" fill="rgba(200,136,42,.1)"/></pattern></defs>
+      <rect width="900" height="500" fill="url(#gdots)"/>
+    </svg>
+  </div>
+
+  <!-- Decision log -->
+  <div class="card cl" style="margin-bottom:13px">
+    <div class="card-ttl cl">📋 Registro de Decisiones de Diseño</div>
+    <div class="dec-log" id="dec-log" style="margin-top:7px">
+      <div class="dec"><span class="dec-t">—</span> <span class="dec-c">[INICIO]</span>Empieza a diseñar para ver tus decisiones aquí</div>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">
+      <input type="text" id="dec-in" placeholder="Añade una nota de diseño..." style="flex:1;background:rgba(13,9,5,.85);border:1px solid rgba(200,136,42,.22);border-radius:2px;color:var(--parch3);font-family:var(--font-body);font-size:.76rem;padding:6px 10px;outline:none;min-width:160px">
+      <button class="btn-cl" style="font-size:.65rem;padding:6px 13px" onclick="addDec()">+ Registrar</button>
+    </div>
+  </div>
+
+  <div class="snav">
+    <button class="btn-s" onclick="goSec(1)">← Anterior</button>
+    <button class="btn-p" onclick="doneSec(2);goSec(3)">Siguiente → Colores</button>
+  </div>
+</div>
+</section>
+
+<!-- ══════ SEC 3 – COLORES ══════ -->
+<section class="sec" id="sec-3">
+<div style="max-width:900px;margin:0 auto">
+  <div class="sec-head">
+    <div class="sec-ep">Capítulo IV · Los Pigmentos de la Tribu</div>
+    <h2 class="sec-title rd">Selección de Colores</h2>
+    <div class="sec-rule cl"><span>🎨</span></div>
+    <p class="sec-desc">Los colores hablan antes que las palabras. Elige los que representan a tu tribu.</p>
+  </div>
+  <div class="mission">
+    <div class="mission-eye">TU MISIÓN</div>
+    <p class="mission-txt">Selecciona la <strong>paleta de colores</strong> del portal de la tribu WIRA. Necesitas: <strong>1 color primario</strong> (el más importante), <strong>1 color secundario</strong> y <strong>1 color de fondo/acento</strong>. Justifica tus elecciones culturalmente.</p>
+    <div class="mission-hl"><strong>📸 Evidencia:</strong> Pantallazo de tu paleta seleccionada con el preview del portal activo. Sube a tu bitácora digital.</div>
+  </div>
+  <div class="narr-strip">
+    <span class="narr-ico">🌿</span>
+    <p class="narr-txt" id="nt-col">La pintora Oya enseña: "El rojo habla de guerra y pasión. El verde de vida y naturaleza. El azul de confianza y agua. El amarillo de sol y alegría. Elige los colores de tu tribu con sabiduría — cada uno cuenta una historia."</p>
+    <button class="btn-narr" id="nb-col" onclick="narr('nt-col','nb-col')">🔊<span class="nwav" id="nw-col" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></button>
+  </div>
+
+  <!-- Color psychology chips -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:18px">
+    <div style="border-radius:2px;overflow:hidden;background:rgba(18,12,6,.8);border:1px solid rgba(200,136,42,.18)"><div style="height:36px;background:linear-gradient(135deg,#c4622a,#d4733b)"></div><div style="padding:7px;font-size:.67rem;color:var(--parch3);font-family:var(--font-body);line-height:1.5"><strong style="color:var(--clay2)">Tierra/Naranja</strong><br>Calidez, comunidad</div></div>
+    <div style="border-radius:2px;overflow:hidden;background:rgba(18,12,6,.8);border:1px solid rgba(200,136,42,.18)"><div style="height:36px;background:linear-gradient(135deg,#3a5c2a,#4e7838)"></div><div style="padding:7px;font-size:.67rem;color:var(--parch3);font-family:var(--font-body);line-height:1.5"><strong style="color:var(--sage)">Verde/Musgo</strong><br>Naturaleza, vida</div></div>
+    <div style="border-radius:2px;overflow:hidden;background:rgba(18,12,6,.8);border:1px solid rgba(200,136,42,.18)"><div style="height:36px;background:linear-gradient(135deg,#284870,#3a6898)"></div><div style="padding:7px;font-size:.67rem;color:var(--parch3);font-family:var(--font-body);line-height:1.5"><strong style="color:#7ab0e0">Azul/Agua</strong><br>Confianza, calma</div></div>
+    <div style="border-radius:2px;overflow:hidden;background:rgba(18,12,6,.8);border:1px solid rgba(200,136,42,.18)"><div style="height:36px;background:linear-gradient(135deg,#c8882a,#e8a820)"></div><div style="padding:7px;font-size:.67rem;color:var(--parch3);font-family:var(--font-body);line-height:1.5"><strong style="color:var(--gold2)">Oro/Ocre</strong><br>Sabiduría, nobleza</div></div>
+    <div style="border-radius:2px;overflow:hidden;background:rgba(18,12,6,.8);border:1px solid rgba(200,136,42,.18)"><div style="height:36px;background:linear-gradient(135deg,#7a1c1c,#9e3d18)"></div><div style="padding:7px;font-size:.67rem;color:var(--parch3);font-family:var(--font-body);line-height:1.5"><strong style="color:#d4624a">Rojo/Sangre</strong><br>Pasión, fuerza</div></div>
+    <div style="border-radius:2px;overflow:hidden;background:rgba(18,12,6,.8);border:1px solid rgba(200,136,42,.18)"><div style="height:36px;background:linear-gradient(135deg,#d8c8a8,#f2deb8)"></div><div style="padding:7px;font-size:.67rem;color:var(--stone);font-family:var(--font-body);line-height:1.5"><strong style="color:var(--parch)">Hueso/Piel</strong><br>Claridad, pureza</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:17px">
+    <div>
+      <div style="font-family:var(--font-title);font-size:.6rem;color:var(--ochre);letter-spacing:3px;margin-bottom:11px">ELIGE TU PALETA:</div>
+      <!-- Primary -->
+      <div style="margin-bottom:13px">
+        <div style="font-size:.67rem;color:var(--ash);font-family:var(--font-title);display:flex;align-items:center;gap:6px;margin-bottom:7px">🔴 Color Primario <span id="c-pri-lbl" style="color:var(--ochre);font-family:var(--font-mono)">#c4622a</span></div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap" id="cp-pri">
+          <div class="swatch sel" data-role="primary" data-hex="#c4622a" onclick="pickCol('primary','#c4622a',this)"><div class="swatch-bar" style="background:#c4622a"></div><div class="swatch-lbl">Terracota</div></div>
+          <div class="swatch" data-role="primary" data-hex="#3a5c2a" onclick="pickCol('primary','#3a5c2a',this)"><div class="swatch-bar" style="background:#3a5c2a"></div><div class="swatch-lbl">Musgo</div></div>
+          <div class="swatch" data-role="primary" data-hex="#284870" onclick="pickCol('primary','#284870',this)"><div class="swatch-bar" style="background:#284870"></div><div class="swatch-lbl">Azul</div></div>
+          <div class="swatch" data-role="primary" data-hex="#7a1c1c" onclick="pickCol('primary','#7a1c1c',this)"><div class="swatch-bar" style="background:#7a1c1c"></div><div class="swatch-lbl">Sangre</div></div>
+          <div class="swatch" data-role="primary" data-hex="#1a1008" onclick="pickCol('primary','#1a1008',this)"><div class="swatch-bar" style="background:#1a1008;border:1px solid #4a3520"></div><div class="swatch-lbl">Carbón</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:7px"><span style="font-size:.65rem;color:var(--ash);font-family:var(--font-body)">Personalizado:</span><input type="color" value="#c4622a" oninput="pickCol('primary',this.value,null)"></div>
+      </div>
+      <!-- Secondary -->
+      <div style="margin-bottom:13px">
+        <div style="font-size:.67rem;color:var(--ash);font-family:var(--font-title);display:flex;align-items:center;gap:6px;margin-bottom:7px">🟡 Color Secundario <span id="c-sec-lbl" style="color:var(--ochre);font-family:var(--font-mono)">#c8882a</span></div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap" id="cp-sec">
+          <div class="swatch sel" data-role="secondary" data-hex="#c8882a" onclick="pickCol('secondary','#c8882a',this)"><div class="swatch-bar" style="background:#c8882a"></div><div class="swatch-lbl">Ocre</div></div>
+          <div class="swatch" data-role="secondary" data-hex="#6e9e5a" onclick="pickCol('secondary','#6e9e5a',this)"><div class="swatch-bar" style="background:#6e9e5a"></div><div class="swatch-lbl">Salvia</div></div>
+          <div class="swatch" data-role="secondary" data-hex="#8a7058" onclick="pickCol('secondary','#8a7058',this)"><div class="swatch-bar" style="background:#8a7058"></div><div class="swatch-lbl">Arena</div></div>
+          <div class="swatch" data-role="secondary" data-hex="#e8a820" onclick="pickCol('secondary','#e8a820',this)"><div class="swatch-bar" style="background:#e8a820"></div><div class="swatch-lbl">Oro</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:7px"><span style="font-size:.65rem;color:var(--ash);font-family:var(--font-body)">Personalizado:</span><input type="color" value="#c8882a" oninput="pickCol('secondary',this.value,null)"></div>
+      </div>
+      <!-- Accent/Bg -->
+      <div>
+        <div style="font-size:.67rem;color:var(--ash);font-family:var(--font-title);display:flex;align-items:center;gap:6px;margin-bottom:7px">⚪ Fondo / Texto <span id="c-acc-lbl" style="color:var(--ochre);font-family:var(--font-mono)">#f2deb8</span></div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap" id="cp-acc">
+          <div class="swatch sel" data-role="accent" data-hex="#f2deb8" onclick="pickCol('accent','#f2deb8',this)"><div class="swatch-bar" style="background:#f2deb8"></div><div class="swatch-lbl">Pergamino</div></div>
+          <div class="swatch" data-role="accent" data-hex="#0d0906" onclick="pickCol('accent','#0d0906',this)"><div class="swatch-bar" style="background:#0d0906;border:1px solid #4a3520"></div><div class="swatch-lbl">Cueva</div></div>
+          <div class="swatch" data-role="accent" data-hex="#f5bf40" onclick="pickCol('accent','#f5bf40',this)"><div class="swatch-bar" style="background:#f5bf40"></div><div class="swatch-lbl">Dorado</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:7px"><span style="font-size:.65rem;color:var(--ash);font-family:var(--font-body)">Personalizado:</span><input type="color" value="#f2deb8" oninput="pickCol('accent',this.value,null)"></div>
+      </div>
+    </div>
+    <!-- Live preview -->
+    <div>
+      <div style="font-family:var(--font-title);font-size:.6rem;color:var(--ochre);letter-spacing:3px;margin-bottom:11px">PREVIEW EN VIVO:</div>
+      <div class="cprev-wrap" id="cprev">
+        <div class="cprev-nav" id="cpn" style="background:#c4622a"><span style="font-family:'Cinzel Decorative',serif;font-size:.8rem;color:#f2deb8;letter-spacing:2px">TRIBU WIRA</span><div style="display:flex;gap:8px"><div style="width:36px;height:5px;background:rgba(242,222,184,.4);border-radius:2px"></div><div style="width:36px;height:5px;background:rgba(242,222,184,.4);border-radius:2px"></div><div style="width:36px;height:5px;background:rgba(242,222,184,.4);border-radius:2px"></div></div></div>
+        <div class="cprev-hero" id="cph" style="background:#1a1008"><div class="cprev-htitle" id="cpht" style="color:#c8882a">Portal Tribal WIRA</div><div style="font-size:.67rem;color:#d8c8a8;font-family:'Lora',serif;opacity:.75">Guardianes del bosque ancestral</div><div id="cphb" style="display:inline-block;margin-top:9px;padding:6px 16px;background:#c4622a;border-radius:2px;font-size:.67rem;color:#f2deb8;font-family:'Cinzel',serif;letter-spacing:1px">Conocer más</div></div>
+        <div class="cprev-body" id="cpbd" style="background:#f2deb8"><div style="background:rgba(0,0,0,.09);border-radius:2px;height:38px"></div><div style="background:rgba(0,0,0,.09);border-radius:2px;height:38px"></div><div style="background:rgba(0,0,0,.09);border-radius:2px;height:38px"></div></div>
+        <div class="cprev-foot" id="cpft" style="background:#2e1f0e;color:#6b5030">© Tribu WIRA — Derechos ancestrales reservados</div>
+      </div>
+      <!-- Palette strip -->
+      <div id="pal-strip" style="display:flex;height:24px;margin-top:8px;border-radius:2px;overflow:hidden">
+        <div id="ps-p" style="flex:2;background:#c4622a"></div>
+        <div id="ps-s" style="flex:2;background:#c8882a"></div>
+        <div id="ps-a" style="flex:1;background:#f2deb8"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card rd" style="margin-bottom:14px">
+    <div class="card-ttl rd">📝 Justificación de tu Paleta</div>
+    <textarea class="fb-ta" id="col-just" style="min-height:65px;margin-top:7px" placeholder="¿Por qué elegiste estos colores? ¿Qué transmiten? ¿Cómo representan la identidad de la tribu WIRA?"></textarea>
+  </div>
+  <div class="snav">
+    <button class="btn-s" onclick="goSec(2)">← Anterior</button>
+    <button class="btn-p" onclick="doneSec(3);goSec(4)">Siguiente → Tipografías</button>
+  </div>
+</div>
+</section>
+<!-- ══════ SEC 4 – TIPOGRAFÍAS ══════ -->
+<section class="sec" id="sec-4">
+<div style="max-width:900px;margin:0 auto">
+  <div class="sec-head">
+    <div class="sec-ep">Capítulo V · La Voz Escrita de la Tribu</div>
+    <h2 class="sec-title ms">Selección de Tipografías</h2>
+    <div class="sec-rule ms"><span>✍️</span></div>
+    <p class="sec-desc">Las letras son la voz escrita. Cada fuente cuenta una historia diferente.</p>
+  </div>
+  <div class="mission">
+    <div class="mission-eye">TU MISIÓN</div>
+    <p class="mission-txt">Elige <strong>2 tipografías</strong> para el portal: una para <strong>títulos</strong> (impactante) y otra para <strong>cuerpo de texto</strong> (legible). Considera la personalidad, legibilidad y cómo combinan entre sí.</p>
+    <div class="mission-hl"><strong>📸 Evidencia:</strong> Pantallazo con tipografías elegidas y el preview activo. Sube a tu bitácora digital.</div>
+  </div>
+  <div class="narr-strip">
+    <span class="narr-ico">📜</span>
+    <p class="narr-txt" id="nt-fnt">El escriba Kalam enseña: "Una tipografía serif tiene remates como líneas del tiempo en una roca. Una sans-serif es limpia como piedra pulida. El display es dramático como un tótem. La letra es la personalidad — elige con sabiduría."</p>
+    <button class="btn-narr" id="nb-fnt" onclick="narr('nt-fnt','nb-fnt')">🔊<span class="nwav" id="nw-fnt" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></button>
+  </div>
+
+  <div style="margin-bottom:18px">
+    <div style="font-family:var(--font-title);font-size:.6rem;color:var(--sage);letter-spacing:3px;margin-bottom:11px">✍️ FUENTE PARA TÍTULOS:</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px" id="title-fonts">
+      <div class="font-card sel-f" onclick="pickFont('title','Cinzel Decorative',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:'Cinzel Decorative',serif">WIRA</div><div class="font-name">Cinzel Decorative</div><div class="font-sample" style="font-family:'Cinzel Decorative',serif;font-size:.7rem">PORTAL TRIBAL</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Épica · Monumental</div></div>
+      <div class="font-card" onclick="pickFont('title','Cinzel',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:'Cinzel',serif">Tribu</div><div class="font-name">Cinzel</div><div class="font-sample" style="font-family:'Cinzel',serif">Portal Ancestral</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Clásica · Refinada</div></div>
+      <div class="font-card" onclick="pickFont('title','Georgia',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:Georgia,serif">Tribu</div><div class="font-name">Georgia</div><div class="font-sample" style="font-family:Georgia,serif">Portal Ancestral</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Serif · Confiable</div></div>
+      <div class="font-card" onclick="pickFont('title','Impact',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:Impact,sans-serif">WIRA</div><div class="font-name">Impact</div><div class="font-sample" style="font-family:Impact,sans-serif;font-size:.82rem">PORTAL TRIBAL</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Poderosa · Moderna</div></div>
+      <div class="font-card" onclick="pickFont('title','Palatino Linotype',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:'Palatino Linotype',serif">Tribu</div><div class="font-name">Palatino</div><div class="font-sample" style="font-family:'Palatino Linotype',serif">Portal Ancestral</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Elegante · Ancestral</div></div>
+    </div>
+  </div>
+  <div style="margin-bottom:18px">
+    <div style="font-family:var(--font-title);font-size:.6rem;color:var(--ash);letter-spacing:3px;margin-bottom:11px">📖 FUENTE PARA CUERPO DE TEXTO:</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px" id="body-fonts">
+      <div class="font-card sel-f" onclick="pickFont('body','Lora',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:'Lora',serif;font-size:1.6rem">Abc</div><div class="font-name">Lora</div><div class="font-sample" style="font-family:'Lora',serif">La tribu trabaja unida para preservar su legado ancestral.</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Serif · Cálida · Legible</div></div>
+      <div class="font-card" onclick="pickFont('body','Cardo',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:'Cardo',serif;font-size:1.6rem">Abc</div><div class="font-name">Cardo</div><div class="font-sample" style="font-family:'Cardo',serif">La tribu trabaja unida para preservar su legado.</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Literaria · Clásica</div></div>
+      <div class="font-card" onclick="pickFont('body','Verdana',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:Verdana,sans-serif;font-size:1.3rem">Abc</div><div class="font-name">Verdana</div><div class="font-sample" style="font-family:Verdana,sans-serif;font-size:.69rem">La tribu trabaja unida para preservar su legado.</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Muy legible · Digital</div></div>
+      <div class="font-card" onclick="pickFont('body','Georgia',this)"><div class="font-chk">✓</div><div class="font-prev" style="font-family:Georgia,serif;font-size:1.4rem">Abc</div><div class="font-name">Georgia</div><div class="font-sample" style="font-family:Georgia,serif">La tribu trabaja unida para preservar su legado.</div><div style="font-size:.58rem;color:var(--smoke);margin-top:4px;font-family:var(--font-body)">Tradicional · Confiable</div></div>
+    </div>
+  </div>
+  <!-- Type preview -->
+  <div class="card ms" style="margin-bottom:13px">
+    <div class="card-ttl ms">👁️ Preview de Tipografías</div>
+    <div style="margin-top:12px;padding:16px;background:rgba(8,5,2,.7);border-radius:2px">
+      <div id="tp-title" style="font-family:'Cinzel Decorative',serif;font-size:1.5rem;color:var(--ochre);margin-bottom:7px">Título del Portal de la Tribu WIRA</div>
+      <div id="tp-body" style="font-family:'Lora',serif;font-size:.85rem;color:var(--parch2);line-height:1.9">Somos guardianes del bosque ancestral, portadores de la sabiduría de los abuelos. Nuestras manos crean lo que el tiempo no puede destruir. Únete y descubre el poder de lo que fue y lo que será.</div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <span id="tp-f1" style="font-size:.62rem;color:var(--ash);font-family:var(--font-mono)">Títulos: Cinzel Decorative</span>
+        <span style="color:var(--stone2)">·</span>
+        <span id="tp-f2" style="font-size:.62rem;color:var(--ash);font-family:var(--font-mono)">Cuerpo: Lora</span>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:13px">
+    <div class="card-ttl">📝 Justificación de Tipografías</div>
+    <textarea class="fb-ta" id="fnt-just" style="min-height:65px;margin-top:7px" placeholder="¿Por qué elegiste estas tipografías? ¿Cómo reflejan la identidad de la tribu WIRA?"></textarea>
+  </div>
+  <div class="snav"><button class="btn-s" onclick="goSec(3)">← Anterior</button><button class="btn-p" onclick="doneSec(4);goSec(5)">Siguiente → Estructura</button></div>
+</div>
+</section>
+
+<!-- ══════ SEC 5 – ESTRUCTURA ══════ -->
+<section class="sec" id="sec-5">
+<div style="max-width:900px;margin:0 auto">
+  <div class="sec-head">
+    <div class="sec-ep">Capítulo VI · La Arquitectura del Portal</div>
+    <h2 class="sec-title ms">Diseño de Estructura Web</h2>
+    <div class="sec-rule ms"><span>🏗️</span></div>
+    <p class="sec-desc">Con todos los ingredientes listos, construye la estructura final del portal.</p>
+  </div>
+  <div class="mission">
+    <div class="mission-eye">TU MISIÓN FINAL DE DISEÑO</div>
+    <p class="mission-txt">Diseña la estructura completa del portal usando el <strong>constructor de secciones</strong>. Incluye obligatoriamente: <strong>Nav, Hero, al menos 2 secciones de contenido y Footer</strong>. Configura también el nombre y slogan de tu portal.</p>
+    <div class="mission-hl"><strong>📸 Evidencia:</strong> Pantallazo de la estructura completa construida. Sube a tu bitácora digital.</div>
+  </div>
+  <div class="narr-strip">
+    <span class="narr-ico">🏗️</span>
+    <p class="narr-txt" id="nt-str">El constructor Barak enseña: "La estructura de una página es como las capas de una cueva: navegación arriba como el cielo, contenido en el medio como la vida, pie de página abajo como la tierra. Cada capa tiene su función sagrada."</p>
+    <button class="btn-narr" id="nb-str" onclick="narr('nt-str','nb-str')">🔊<span class="nwav" id="nw-str" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></button>
+  </div>
+  <div style="display:grid;grid-template-columns:240px 1fr;gap:16px;margin-bottom:16px">
+    <!-- Palette -->
+    <div>
+      <div class="card ms" style="margin-bottom:11px">
+        <div class="card-ttl ms">🧱 Secciones Disponibles</div>
+        <div style="margin-top:9px;display:flex;flex-direction:column;gap:6px" id="sec-pal">
+          <div onclick="addStrSec('nav')" style="padding:8px 11px;background:rgba(78,120,56,.1);border:1.5px solid rgba(78,120,56,.3);border-radius:2px;cursor:pointer;font-family:var(--font-title);font-size:.7rem;color:var(--sage);transition:all .2s" onmouseover="this.style.background='rgba(78,120,56,.22)'" onmouseout="this.style.background='rgba(78,120,56,.1)'">🧭 Barra de Navegación</div>
+          <div onclick="addStrSec('hero')" style="padding:8px 11px;background:rgba(200,136,42,.1);border:1.5px solid rgba(200,136,42,.3);border-radius:2px;cursor:pointer;font-family:var(--font-title);font-size:.7rem;color:var(--ochre);transition:all .2s" onmouseover="this.style.background='rgba(200,136,42,.22)'" onmouseout="this.style.background='rgba(200,136,42,.1)'">🏔️ Hero / Banner</div>
+          <div onclick="addStrSec('about')" style="padding:8px 11px;background:rgba(196,114,42,.1);border:1.5px solid rgba(196,114,42,.3);border-radius:2px;cursor:pointer;font-family:var(--font-title);font-size:.7rem;color:var(--clay2);transition:all .2s" onmouseover="this.style.background='rgba(196,114,42,.22)'" onmouseout="this.style.background='rgba(196,114,42,.1)'">📖 Sobre Nosotros</div>
+          <div onclick="addStrSec('srv')" style="padding:8px 11px;background:rgba(200,160,80,.1);border:1.5px solid rgba(200,160,80,.3);border-radius:2px;cursor:pointer;font-family:var(--font-title);font-size:.7rem;color:var(--bone);transition:all .2s" onmouseover="this.style.background='rgba(200,160,80,.22)'" onmouseout="this.style.background='rgba(200,160,80,.1)'">🛠️ Servicios / Galería</div>
+          <div onclick="addStrSec('test')" style="padding:8px 11px;background:rgba(122,28,28,.1);border:1.5px solid rgba(122,28,28,.3);border-radius:2px;cursor:pointer;font-family:var(--font-title);font-size:.7rem;color:#d4624a;transition:all .2s" onmouseover="this.style.background='rgba(122,28,28,.22)'" onmouseout="this.style.background='rgba(122,28,28,.1)'">💬 Testimonios</div>
+          <div onclick="addStrSec('contact')" style="padding:8px 11px;background:rgba(40,72,112,.1);border:1.5px solid rgba(40,72,112,.3);border-radius:2px;cursor:pointer;font-family:var(--font-title);font-size:.7rem;color:#7ab0e0;transition:all .2s" onmouseover="this.style.background='rgba(40,72,112,.22)'" onmouseout="this.style.background='rgba(40,72,112,.1)'">✉️ Contacto</div>
+          <div onclick="addStrSec('footer')" style="padding:8px 11px;background:rgba(46,31,14,.25);border:1.5px solid rgba(107,80,48,.38);border-radius:2px;cursor:pointer;font-family:var(--font-title);font-size:.7rem;color:var(--ash);transition:all .2s" onmouseover="this.style.background='rgba(46,31,14,.45)'" onmouseout="this.style.background='rgba(46,31,14,.25)'">🪨 Pie de Página</div>
+        </div>
+        <button class="btn-s" style="width:100%;margin-top:9px;font-size:.6rem" onclick="clearStr()">↺ Limpiar</button>
+      </div>
+      <div class="card ms">
+        <div class="card-ttl ms">📊 Progreso</div>
+        <div style="font-size:.68rem;color:var(--ash);font-family:var(--font-title)">Secciones: <span id="str-cnt" style="color:var(--sage)">0</span></div>
+        <div style="background:rgba(78,120,56,.1);border-radius:2px;height:5px;margin-top:6px;overflow:hidden"><div id="str-bar" style="height:100%;background:linear-gradient(90deg,var(--moss),var(--sage));border-radius:2px;width:0%;transition:width .5s"></div></div>
+        <div style="font-size:.65rem;color:var(--smoke);font-family:var(--font-title);margin-top:6px;line-height:1.55">Mín: Nav + Hero + 2 secciones + Footer</div>
+      </div>
+    </div>
+    <!-- Canvas -->
+    <div>
+      <div style="font-family:var(--font-title);font-size:.58rem;color:var(--moss2);letter-spacing:3px;margin-bottom:9px">PORTAL EN CONSTRUCCIÓN:</div>
+      <div class="struct-canvas" id="str-canvas">
+        <div id="str-empty" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;pointer-events:none;opacity:.38">
+          <span style="font-size:2.2rem">🏗️</span>
+          <p style="font-family:var(--font-title);font-size:.7rem;color:var(--ash);letter-spacing:2px;text-align:center">Haz clic en las secciones para construir</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Site content config -->
+  <div class="card ms" id="str-cfg" style="margin-bottom:13px;display:none">
+    <div class="card-ttl ms">✏️ Contenido del Portal</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:9px">
+      <div><label style="font-size:.65rem;color:var(--ash);font-family:var(--font-title);display:block;margin-bottom:5px">Nombre de la Tribu / Portal</label><input type="text" id="site-name" placeholder="Tribu WIRA" style="width:100%;background:rgba(13,9,5,.85);border:1px solid rgba(78,120,56,.28);border-radius:2px;color:var(--parch3);font-family:var(--font-body);font-size:.78rem;padding:6px 9px;outline:none"></div>
+      <div><label style="font-size:.65rem;color:var(--ash);font-family:var(--font-title);display:block;margin-bottom:5px">Slogan / Frase Principal</label><input type="text" id="site-slogan" placeholder="Guardianes del bosque ancestral" style="width:100%;background:rgba(13,9,5,.85);border:1px solid rgba(78,120,56,.28);border-radius:2px;color:var(--parch3);font-family:var(--font-body);font-size:.78rem;padding:6px 9px;outline:none"></div>
+      <div style="grid-column:1/-1"><label style="font-size:.65rem;color:var(--ash);font-family:var(--font-title);display:block;margin-bottom:5px">Descripción breve</label><textarea style="width:100%;background:rgba(13,9,5,.85);border:1px solid rgba(78,120,56,.28);border-radius:2px;color:var(--parch3);font-family:var(--font-body);font-size:.78rem;padding:6px 9px;outline:none;resize:vertical;min-height:50px" id="site-desc" placeholder="Quiénes somos, qué hacemos..."></textarea></div>
+    </div>
+  </div>
+  <div class="snav"><button class="btn-s" onclick="goSec(4)">← Anterior</button><button class="btn-p" onclick="doneSec(5);goSec(6)">Siguiente → Feedback</button></div>
+</div>
+</section>
+
+<!-- ══════ SEC 6 – FEEDBACK ══════ -->
+<section class="sec" id="sec-6">
+<div style="max-width:900px;margin:0 auto">
+  <div class="sec-head">
+    <div class="sec-ep">Capítulo VII · El Consejo Inter-Tribal</div>
+    <h2 class="sec-title oc">Retroalimentación entre Tribus</h2>
+    <div class="sec-rule oc"><span>🤝</span></div>
+    <p class="sec-desc">Los mejores diseños nacen de escuchar otras perspectivas.</p>
+  </div>
+  <div class="mission">
+    <div class="mission-eye">TU MISIÓN</div>
+    <p class="mission-txt">El Consejo de las Cuatro Tribus ha convocado una reunión de revisión. Evalúa el diseño de cada tribu vecina y deja retroalimentación <strong>constructiva y específica</strong>. Luego reflexiona sobre cómo mejorarías tu propio diseño.</p>
+    <div class="mission-hl"><strong>📸 Evidencia:</strong> Pantallazo de las 4 evaluaciones completas y tu reflexión. Sube a tu bitácora digital.</div>
+  </div>
+  <div class="tribe-grid" style="margin-bottom:16px">
+    <!-- Tribe 1 -->
+    <div class="tribe-card">
+      <div class="tribe-hdr"><span class="tribe-ava">🦁</span><div><div class="tribe-nm">TRIBU MAKON</div><div class="tribe-role">Portal: Artesanías tribales</div></div></div>
+      <div style="border-radius:2px;overflow:hidden;margin-bottom:9px;border:1px solid rgba(200,136,42,.14)">
+        <div style="padding:7px 11px;background:#7a1c1c;font-family:'Cinzel Decorative',serif;font-size:.7rem;color:#f2deb8;display:flex;justify-content:space-between"><span>MAKON CRAFTS</span><span style="font-size:.52rem;opacity:.7">Nav ▼</span></div>
+        <div style="padding:11px;background:#1a1008;text-align:center"><div style="font-size:.72rem;color:#c8882a;font-family:'Cinzel Decorative',serif">Artesanías que viven</div><div style="font-size:.58rem;color:#8a7058;margin-top:3px">Cada pieza cuenta una historia</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:5px;background:#f2deb8"><div style="background:rgba(0,0,0,.09);height:26px;border-radius:1px"></div><div style="background:rgba(0,0,0,.09);height:26px;border-radius:1px"></div></div>
+      </div>
+      <div style="font-size:.67rem;color:var(--ash);font-family:var(--font-body);margin-bottom:5px">Colores: <span style="display:inline-block;width:9px;height:9px;background:#7a1c1c;border-radius:50%;vertical-align:middle"></span> <span style="display:inline-block;width:9px;height:9px;background:#c8882a;border-radius:50%;vertical-align:middle"></span> · Cinzel Decorative + Georgia</div>
+      <div class="stars" id="st0"><span class="star" onclick="setStar(0,1)">★</span><span class="star" onclick="setStar(0,2)">★</span><span class="star" onclick="setStar(0,3)">★</span><span class="star" onclick="setStar(0,4)">★</span><span class="star" onclick="setStar(0,5)">★</span></div>
+      <textarea class="fb-ta" id="fb0" style="min-height:60px" placeholder="¿Qué funciona bien? ¿Qué mejorarías y por qué? Sé específico y constructivo..."></textarea>
+    </div>
+    <!-- Tribe 2 -->
+    <div class="tribe-card">
+      <div class="tribe-hdr"><span class="tribe-ava">🦅</span><div><div class="tribe-nm">TRIBU KALUA</div><div class="tribe-role">Portal: Ecoturismo ancestral</div></div></div>
+      <div style="border-radius:2px;overflow:hidden;margin-bottom:9px;border:1px solid rgba(200,136,42,.14)">
+        <div style="padding:7px 11px;background:#3a5c2a;font-family:Georgia,serif;font-size:.72rem;color:#f2deb8;display:flex;justify-content:space-between"><span>KALUA ECO</span><span style="font-size:.52rem;opacity:.7">≡</span></div>
+        <div style="padding:11px;background:#0e1a0a;text-align:center"><div style="font-size:.72rem;color:#6e9e5a;font-family:Georgia,serif">La naturaleza como hogar</div><div style="font-size:.58rem;color:#3a5c2a;margin-top:3px">Tours · Camping · Cultura</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:5px;background:#dff0d8"><div style="background:rgba(0,0,0,.06);height:26px;border-radius:1px"></div><div style="background:rgba(0,0,0,.06);height:26px;border-radius:1px"></div><div style="background:rgba(0,0,0,.06);height:26px;border-radius:1px"></div></div>
+      </div>
+      <div style="font-size:.67rem;color:var(--ash);font-family:var(--font-body);margin-bottom:5px">Colores: <span style="display:inline-block;width:9px;height:9px;background:#3a5c2a;border-radius:50%;vertical-align:middle"></span> <span style="display:inline-block;width:9px;height:9px;background:#6e9e5a;border-radius:50%;vertical-align:middle"></span> · Georgia + Verdana</div>
+      <div class="stars" id="st1"><span class="star" onclick="setStar(1,1)">★</span><span class="star" onclick="setStar(1,2)">★</span><span class="star" onclick="setStar(1,3)">★</span><span class="star" onclick="setStar(1,4)">★</span><span class="star" onclick="setStar(1,5)">★</span></div>
+      <textarea class="fb-ta" id="fb1" style="min-height:60px" placeholder="¿Qué funciona bien? ¿Qué mejorarías y por qué? Sé específico y constructivo..."></textarea>
+    </div>
+    <!-- Tribe 3 -->
+    <div class="tribe-card">
+      <div class="tribe-hdr"><span class="tribe-ava">🐺</span><div><div class="tribe-nm">TRIBU ZORAK</div><div class="tribe-role">Portal: Música y danza</div></div></div>
+      <div style="border-radius:2px;overflow:hidden;margin-bottom:9px;border:1px solid rgba(200,136,42,.14)">
+        <div style="padding:7px 11px;background:#1a1008;font-family:Impact,sans-serif;font-size:.75rem;color:#e8a820;display:flex;justify-content:space-between"><span>ZORAK BEATS</span><span style="font-size:.52rem;color:#8a7058">MENÚ</span></div>
+        <div style="padding:11px;background:#281505;text-align:center"><div style="font-size:.78rem;color:#e8a820;font-family:Impact,sans-serif">EL RITMO DE LA TRIBU</div><div style="font-size:.58rem;color:#c4622a;margin-top:3px">Música · Danza · Tradición</div></div>
+        <div style="padding:5px;background:#1a1008"><div style="height:26px;background:rgba(232,168,32,.08);border-radius:1px;display:flex;align-items:center;justify-content:center;font-size:.58rem;color:#e8a820">♪ Eventos próximos ♪</div></div>
+      </div>
+      <div style="font-size:.67rem;color:var(--ash);font-family:var(--font-body);margin-bottom:5px">Colores: <span style="display:inline-block;width:9px;height:9px;background:#1a1008;border-radius:50%;vertical-align:middle;border:1px solid #6b5030"></span> <span style="display:inline-block;width:9px;height:9px;background:#e8a820;border-radius:50%;vertical-align:middle"></span> · Impact + Georgia</div>
+      <div class="stars" id="st2"><span class="star" onclick="setStar(2,1)">★</span><span class="star" onclick="setStar(2,2)">★</span><span class="star" onclick="setStar(2,3)">★</span><span class="star" onclick="setStar(2,4)">★</span><span class="star" onclick="setStar(2,5)">★</span></div>
+      <textarea class="fb-ta" id="fb2" style="min-height:60px" placeholder="¿Qué funciona bien? ¿Qué mejorarías y por qué? Sé específico y constructivo..."></textarea>
+    </div>
+    <!-- Tribe 4 -->
+    <div class="tribe-card">
+      <div class="tribe-hdr"><span class="tribe-ava">🦊</span><div><div class="tribe-nm">TRIBU SIWA</div><div class="tribe-role">Portal: Gastronomía ancestral</div></div></div>
+      <div style="border-radius:2px;overflow:hidden;margin-bottom:9px;border:1px solid rgba(200,136,42,.14)">
+        <div style="padding:7px 11px;background:#c4622a;font-family:'Lora',serif;font-size:.72rem;color:#1a1008;font-weight:700;display:flex;justify-content:space-between"><span>SIWA FOODS</span><span style="font-size:.52rem">▶ Carta</span></div>
+        <div style="padding:11px;background:#f2deb8;text-align:center"><div style="font-size:.72rem;color:#7a1c1c;font-family:'Lora',serif;font-weight:600">Sabores que no se olvidan</div><div style="font-size:.58rem;color:#6b5030;margin-top:3px">Recetas milenarias · Ingredientes naturales</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:5px;background:#f2deb8"><div style="background:rgba(122,28,28,.14);height:26px;border-radius:1px"></div><div style="background:rgba(196,98,42,.14);height:26px;border-radius:1px"></div></div>
+      </div>
+      <div style="font-size:.67rem;color:var(--ash);font-family:var(--font-body);margin-bottom:5px">Colores: <span style="display:inline-block;width:9px;height:9px;background:#c4622a;border-radius:50%;vertical-align:middle"></span> <span style="display:inline-block;width:9px;height:9px;background:#f2deb8;border-radius:50%;vertical-align:middle;border:1px solid #a08060"></span> · Lora + Verdana</div>
+      <div class="stars" id="st3"><span class="star" onclick="setStar(3,1)">★</span><span class="star" onclick="setStar(3,2)">★</span><span class="star" onclick="setStar(3,3)">★</span><span class="star" onclick="setStar(3,4)">★</span><span class="star" onclick="setStar(3,5)">★</span></div>
+      <textarea class="fb-ta" id="fb3" style="min-height:60px" placeholder="¿Qué funciona bien? ¿Qué mejorarías y por qué? Sé específico y constructivo..."></textarea>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:13px;border-color:rgba(200,136,42,.38)">
+    <div class="card-ttl">🪞 Reflexión: ¿Cómo mejorarías tu propio diseño?</div>
+    <p style="font-size:.75rem;color:var(--ash);margin-bottom:9px;font-family:var(--font-body)">Después de ver el trabajo de otras tribus, ¿qué cambiarías en tu portal? ¿Qué aprendiste?</p>
+    <textarea class="fb-ta" id="self-ref" style="min-height:75px" placeholder="Reflexiona con honestidad. Los mejores arquitectos siempre mejoran después de ver otras perspectivas..."></textarea>
+  </div>
+  <div class="snav"><button class="btn-s" onclick="goSec(5)">← Anterior</button><button class="btn-p" onclick="doneSec(6);goSec(7)">Siguiente → Bitácora 📜</button></div>
+</div>
+</section>
+
+<!-- ══════ SEC 7 – BITÁCORA ══════ -->
+<section class="sec" id="sec-7">
+<div style="max-width:860px;margin:0 auto">
+  <div class="sec-head">
+    <div class="sec-ep">Capítulo VIII · El Diario del Arquitecto</div>
+    <h2 class="sec-title ms">Bitácora Digital</h2>
+    <div class="sec-rule ms"><span>📜</span></div>
+    <p class="sec-desc">Documenta tu proceso creativo. El arquitecto que no registra, olvida.</p>
+  </div>
+  <div class="mission">
+    <div class="mission-eye">TU MISIÓN FINAL</div>
+    <p class="mission-txt">La bitácora es el corazón de tu proyecto. Aquí registras tu proceso, decisiones, aprendizajes y evidencias. Marca cada pantallazo como subido a tu herramienta digital favorita.</p>
+    <div class="mission-hl" style="border-color:var(--sage)">
+      <strong style="color:var(--sage)">¿Cómo tomar pantallazo?</strong><br>
+      🪟 Windows: <kbd>Win + Shift + S</kbd> &nbsp;
+      🍎 Mac: <kbd>Cmd + Shift + 4</kbd> &nbsp;
+      📱 Tablet: Botón lateral
+    </div>
+  </div>
+
+  <!-- Screenshot tracker -->
+  <div class="shot-grid" style="margin-bottom:16px">
+    <div class="shot-card" id="sc0" onclick="togShot(0)"><span class="shot-ico">🌐</span><div class="shot-ttl">Diseño Web</div><div class="shot-desc">Los 4 pilares con reflexiones</div></div>
+    <div class="shot-card" id="sc1" onclick="togShot(1)"><span class="shot-ico">🕸️</span><div class="shot-ttl">Wireframe</div><div class="shot-desc">Boceto completo 6+ componentes</div></div>
+    <div class="shot-card" id="sc2" onclick="togShot(2)"><span class="shot-ico">🎨</span><div class="shot-ttl">Colores</div><div class="shot-desc">Paleta y preview del portal</div></div>
+    <div class="shot-card" id="sc3" onclick="togShot(3)"><span class="shot-ico">✍️</span><div class="shot-ttl">Tipografías</div><div class="shot-desc">Fuentes elegidas y preview</div></div>
+    <div class="shot-card" id="sc4" onclick="togShot(4)"><span class="shot-ico">🏗️</span><div class="shot-ttl">Estructura</div><div class="shot-desc">Portal completo construido</div></div>
+    <div class="shot-card" id="sc5" onclick="togShot(5)"><span class="shot-ico">🤝</span><div class="shot-ttl">Retroalimentación</div><div class="shot-desc">4 evaluaciones y reflexión</div></div>
+  </div>
+  <!-- Progress -->
+  <div class="card" style="margin-bottom:13px">
+    <div class="card-ttl">📊 Evidencias en Bitácora Digital</div>
+    <div style="background:rgba(200,136,42,.07);border-radius:2px;height:6px;margin-top:9px;overflow:hidden"><div id="shot-prg" style="height:100%;background:linear-gradient(90deg,var(--terr),var(--gold2));border-radius:2px;width:0%;transition:width .6s;box-shadow:0 0 8px var(--ochre)"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:.67rem;font-family:var(--font-title)">
+      <span style="color:var(--ash)">Evidencias: <span id="shot-cnt" style="color:var(--ochre)">0/6</span></span>
+      <span id="shot-st" style="color:var(--ash)">Completa las evidencias</span>
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <!-- INSTRUCCIONES BITÁCORA DIGITAL -->
+  <div style="background:linear-gradient(135deg,rgba(28,17,7,.96),rgba(18,11,4,.96));border:1px solid rgba(200,136,42,.45);border-radius:3px;padding:22px 26px;margin-bottom:14px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ochre),var(--clay),transparent)"></div>
+    <div style="font-family:var(--font-title);font-size:.6rem;color:var(--ochre);letter-spacing:4px;margin-bottom:12px">📜 TU BITÁCORA DIGITAL ES EXTERNA A ESTE JUEGO</div>
+    <p style="font-size:.85rem;color:var(--parch2);line-height:1.95;margin-bottom:16px">
+      La bitácora donde registras tu proceso <strong style="color:var(--gold2)">no está aquí</strong> — está en tu herramienta digital favorita. Usa <strong style="color:var(--gold2)">Google Docs, Padlet, Notion o tu cuaderno digital</strong> para pegar los pantallazos de cada sección y escribir tus reflexiones.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px">
+      <div style="background:rgba(200,136,42,.07);border:1px solid rgba(200,136,42,.25);border-radius:2px;padding:14px">
+        <div style="font-family:var(--font-title);font-size:.62rem;color:var(--ochre);letter-spacing:2px;margin-bottom:7px">🖥️ WINDOWS</div>
+        <div style="font-size:.78rem;color:var(--parch3);line-height:1.75"><kbd style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:2px;font-family:var(--font-mono);font-size:.72rem">Win + Shift + S</kbd><br><span style="font-size:.7rem;color:var(--ash);margin-top:5px;display:block">Selecciona el área → copia → pega en tu bitácora</span></div>
+      </div>
+      <div style="background:rgba(200,136,42,.07);border:1px solid rgba(200,136,42,.25);border-radius:2px;padding:14px">
+        <div style="font-family:var(--font-title);font-size:.62rem;color:var(--ochre);letter-spacing:2px;margin-bottom:7px">🍎 MAC</div>
+        <div style="font-size:.78rem;color:var(--parch3);line-height:1.75"><kbd style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:2px;font-family:var(--font-mono);font-size:.72rem">Cmd + Shift + 4</kbd><br><span style="font-size:.7rem;color:var(--ash);margin-top:5px;display:block">Arrastra para seleccionar → se guarda en escritorio</span></div>
+      </div>
+      <div style="background:rgba(200,136,42,.07);border:1px solid rgba(200,136,42,.25);border-radius:2px;padding:14px">
+        <div style="font-family:var(--font-title);font-size:.62rem;color:var(--ochre);letter-spacing:2px;margin-bottom:7px">📱 TABLET / MÓVIL</div>
+        <div style="font-size:.78rem;color:var(--parch3);line-height:1.75">Botón lateral de encendido + bajar volumen<br><span style="font-size:.7rem;color:var(--ash);margin-top:5px;display:block">O busca "captura de pantalla" en tu dispositivo</span></div>
+      </div>
+    </div>
+    <div style="background:rgba(78,120,56,.08);border:1px solid rgba(78,120,56,.35);border-radius:2px;padding:12px 16px">
+      <div style="font-family:var(--font-title);font-size:.6rem;color:var(--sage);letter-spacing:3px;margin-bottom:6px">✅ FLUJO DE TRABAJO</div>
+      <div style="font-size:.78rem;color:var(--parch3);line-height:1.85">
+        1. Completa una sección del juego &nbsp;→&nbsp;
+        2. Toma el pantallazo &nbsp;→&nbsp;
+        3. Pégalo en tu bitácora digital &nbsp;→&nbsp;
+        4. Escribe tu reflexión debajo &nbsp;→&nbsp;
+        5. Marca la evidencia aquí arriba ✓
+      </div>
+    </div>
+  </div>
+
+  <!-- Reflection questions -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:15px">
+    <div class="card"><div class="card-ttl">🏗️ ¿Qué es el diseño web para ti?</div><textarea class="fb-ta" style="margin-top:6px;min-height:65px" placeholder="En tus propias palabras..." oninput="saveB()"></textarea></div>
+    <div class="card"><div class="card-ttl">🎨 ¿Qué aprendiste sobre UX/UI?</div><textarea class="fb-ta" style="margin-top:6px;min-height:65px" placeholder="Tus aprendizajes clave..." oninput="saveB()"></textarea></div>
+    <div class="card"><div class="card-ttl">💡 ¿Qué mejorarías de tu portal?</div><textarea class="fb-ta" style="margin-top:6px;min-height:65px" placeholder="Pensando en el usuario..." oninput="saveB()"></textarea></div>
+    <div class="card"><div class="card-ttl">🌍 ¿Dónde usarías diseño web en la vida real?</div><textarea class="fb-ta" style="margin-top:6px;min-height:65px" placeholder="Ejemplos concretos..." oninput="saveB()"></textarea></div>
+  </div>
+
+  <div style="text-align:center;margin-top:22px">
+    <button class="btn-p" style="font-size:.88rem;padding:13px 34px" onclick="doneSec(7);showFinal()">🏆 Completar COMUNICAR</button>
+  </div>
+  <div class="snav"><button class="btn-s" onclick="goSec(6)">← Anterior</button><div></div></div>
+</div>
+</section>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- FINAL -->
+<div id="final" style="display:none;position:fixed;inset:0;z-index:4000;background:radial-gradient(ellipse at 50% 65%,rgba(196,114,42,.2),var(--cave) 62%);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px">
+  <div style="max-width:620px;position:relative;z-index:1">
+    <div style="font-family:var(--font-title);font-size:.68rem;color:var(--ochre);letter-spacing:6px;margin-bottom:11px">✦ PORTAL COMPLETADO ✦</div>
+    <h2 style="font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.8rem);color:transparent;background:linear-gradient(135deg,var(--gold2),var(--ochre),var(--clay));-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 25px rgba(200,136,42,.6));margin-bottom:11px;line-height:1.2">¡Eres un Arquitecto<br>Digital de la Tribu!</h2>
+    <p style="font-family:var(--font-body);font-style:italic;font-size:.85rem;color:var(--parch3);margin-bottom:20px;line-height:1.9">El portal de la tribu WIRA brillará en el mundo digital gracias a tu talento y sabiduría de diseño.</p>
+    <div style="display:flex;justify-content:center;gap:22px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="text-align:center"><div style="font-family:var(--font-display);font-size:1.7rem;color:var(--ochre)" id="f-xp">0</div><div style="font-size:.6rem;color:var(--smoke);letter-spacing:2px">XP</div></div>
+      <div style="text-align:center"><div style="font-family:var(--font-display);font-size:1.7rem;color:var(--gold2)" id="f-lvl">1</div><div style="font-size:.6rem;color:var(--smoke);letter-spacing:2px">NIVEL</div></div>
+      <div style="text-align:center"><div style="font-family:var(--font-display);font-size:1.7rem;color:var(--sage)" id="f-bdg">0</div><div style="font-size:.6rem;color:var(--smoke);letter-spacing:2px">INSIGNIAS</div></div>
+    </div>
+    <div id="f-brow" style="display:flex;justify-content:center;gap:9px;font-size:1.7rem;margin-bottom:20px;flex-wrap:wrap"></div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-p" onclick="location.reload()">↺ Nuevo Diseño</button>
+      <button class="btn-s" onclick="exportReport()">📄 Exportar Reporte</button>
+    </div>
+  </div>
+  <div id="f-embers" style="position:fixed;inset:0;pointer-events:none;overflow:hidden"></div>
+</div>
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const G={
+  xp:0,level:1,xpThr:[0,80,200,400,660,960,1300,1700],
+  badges:[false,false,false,false,false,false,false,false],
+  secs:[false,false,false,false,false,false,false,false],
+  shots:[false,false,false,false,false,false],
+  char:null,pNotes:['','','',''],
+  cols:{primary:'#c4622a',secondary:'#c8882a',accent:'#f2deb8'},
+  fonts:{title:'Cinzel Decorative',body:'Lora'},
+  wfEls:[],wfTool:'sel',
+  strSecs:[],
+  stars:[0,0,0,0],
+  decs:[],
+  curNarr:null,
+};
+let wfId=0,strId=0;
+
+// ─── INIT ───
+(()=>{
+  let p=0;const b=document.getElementById('lf');
+  const iv=setInterval(()=>{p+=Math.random()*25;if(p>=100){p=100;clearInterval(iv);setTimeout(()=>{const l=document.getElementById('loading');l.style.opacity='0';setTimeout(()=>l.style.display='none',1100);},280);}b.style.width=p+'%';},200);
+  loadB();
+  spawnBg();
+  // initWF se llama abajo, después de que WF_COMPS esté declarado
+})();
+
+function spawnBg(){
+  setInterval(()=>{
+    const c=document.getElementById('embers');
+    if(c&&document.getElementById('cinematic').style.display!=='none'){
+      for(let i=0;i<3;i++){
+        const e=document.createElement('div');e.className='ember';
+        const sz=1.5+Math.random()*3;
+        e.style.cssText=`left:${30+Math.random()*40}%;bottom:150px;width:${sz}px;height:${sz}px;background:${Math.random()>.5?'#c4622a':'#e8a820'};--dx:${(Math.random()*60-30)}px;animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*.5}s;`;
+        c.appendChild(e);setTimeout(()=>e.remove(),5500);
+      }
+    }
+  },800);
+}
+
+// ─── NARRATION ───
+function narr(textId,btnId){
+  const el=document.getElementById(textId);
+  const btn=document.getElementById(btnId);
+  const wid=btnId.replace('nb-','nw-');
+  const wave=document.getElementById(wid);
+  if(!window.speechSynthesis){return;}
+  if(G.curNarr&&window.speechSynthesis.speaking){
+    window.speechSynthesis.cancel();G.curNarr=null;
+    document.querySelectorAll('.btn-narr').forEach(b=>b.classList.remove('playing'));
+    document.querySelectorAll('.nwav').forEach(w=>w.style.display='none');return;
+  }
+  const txt=(el.innerText||el.textContent).replace(/[🗿✏️🌿📜🏗️]/g,'').replace(/\s+/g,' ').trim();
+  const u=new SpeechSynthesisUtterance(txt);u.lang='es-CO';u.rate=0.83;u.pitch=0.95;u.volume=1;
+  const vs=window.speechSynthesis.getVoices();
+  for(const t of[v=>v.name.includes('Google')&&v.lang.startsWith('es'),v=>v.name.includes('Microsoft')&&v.lang.startsWith('es'),v=>v.lang.startsWith('es')]){const f=vs.find(t);if(f){u.voice=f;break;}}
+  G.curNarr=u;btn.classList.add('playing');if(wave)wave.style.display='flex';
+  u.onend=u.onerror=()=>{btn.classList.remove('playing');if(wave)wave.style.display='none';G.curNarr=null;};
+  setTimeout(()=>window.speechSynthesis.speak(u),100);
+}
+window.speechSynthesis&&window.speechSynthesis.getVoices();
+window.speechSynthesis&&(window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices());
+
+// ─── GAME ───
+function startGame(){
+  document.getElementById('cinematic').style.cssText='transition:opacity 1.5s;opacity:0;pointer-events:none;';
+  setTimeout(()=>{
+    document.getElementById('cinematic').style.display='none';
+    document.getElementById('app').style.display='block';
+    gainXP(25);ach('🗿','Arquitecto Aprendiz','¡El Tótem te ha elegido para diseñar!');earnBadge(0);
+  },1500);
+}
+
+// ─── SECTIONS ───
+function goSec(i){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.sdot').forEach(d=>d.classList.remove('on'));
+  document.getElementById('sec-'+i).classList.add('on');
+  document.getElementById('sd'+i).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function doneSec(i){
+  if(G.secs[i])return;G.secs[i]=true;
+  document.getElementById('sd'+i).classList.add('done');
+  const pts=[20,40,60,50,55,65,55,75];gainXP(pts[i]);earnBadge(i);
+  const nms=['Historia','Fundamentos','Wireframe','Colores','Tipografías','Estructura','Feedback','Bitácora'];
+  ach(['🗿','🌐','🕸️','🎨','✍️','🏗️','🤝','📜'][i],nms[i]+' completado','¡Capítulo superado!');
+}
+
+// ─── XP ───
+function gainXP(n){
+  G.xp+=n;document.getElementById('xp-disp').textContent=G.xp;
+  let l=1;for(let i=G.xpThr.length-1;i>=0;i--){if(G.xp>=G.xpThr[i]){l=i+1;break;}}
+  if(l!==G.level){G.level=l;ach('⬆️','¡Nivel '+l+'!','¡Has subido de nivel como arquitecto!');}
+  G.level=l;document.getElementById('lvl-gem').textContent=l;
+  const c=G.xpThr[Math.min(l-1,G.xpThr.length-1)];
+  const nx=G.xpThr[Math.min(l,G.xpThr.length-1)]||G.xp+1;
+  document.getElementById('xp-bar').style.width=Math.min(100,((G.xp-c)/(nx-c))*100)+'%';
+  floatXP(n);
+}
+function floatXP(n){const el=document.createElement('div');el.className='xpf';el.textContent='+'+n+' XP';el.style.cssText=`left:${50+Math.random()*20}%;top:60px;`;document.body.appendChild(el);setTimeout(()=>el.remove(),1500);}
+function earnBadge(i){if(i<0||i>=G.badges.length||G.badges[i])return;G.badges[i]=true;const b=document.getElementById('b'+i);if(b)b.classList.add('lit');}
+let achTmr;
+function ach(ico,name,desc){clearTimeout(achTmr);document.getElementById('ap-ico').textContent=ico;document.getElementById('ap-name').textContent=name;document.getElementById('ap-desc').textContent=desc;const p=document.getElementById('ach-pop');p.classList.add('show');achTmr=setTimeout(()=>p.classList.remove('show'),3400);}
+
+// ─── CHAR ───
+function pickChar(i,role){G.char=i;document.querySelectorAll('#char-grid .card').forEach((c,j)=>{c.style.transform=j===i?'scale(1.04)':'';c.style.boxShadow=j===i?'0 0 20px rgba(200,136,42,.3)':'';});document.getElementById('char-msg').textContent='✦ Rol elegido: '+role+' ✦';gainXP(10);}
+
+// ─── PILLARS ───
+function togglePilar(i){const b=document.getElementById('pb'+i);const a=document.getElementById('pa'+i);const open=b.style.display==='block';b.style.display=open?'none':'block';a.style.transform=open?'':'rotate(180deg)';if(!open)gainXP(5);}
+function savePN(i,v){G.pNotes[i]=v;}
+
+// ═══════════════════════════════════════════
+// WIREFRAME
+// ═══════════════════════════════════════════
+const WF_COMPS=[
+  {id:'header',icon:'🏛️',label:'Header',w:820,h:58,txt:'HEADER — Logo + Nav'},
+  {id:'hero',icon:'🏔️',label:'Hero',w:820,h:155,txt:'HERO — Imagen + Título + CTA'},
+  {id:'nav',icon:'🧭',label:'Nav',w:820,h:40,txt:'NAVEGACIÓN'},
+  {id:'cards',icon:'🃏',label:'Tarjetas',w:250,h:100,txt:'TARJETA'},
+  {id:'gallery',icon:'🖼️',label:'Galería',w:820,h:115,txt:'GALERÍA'},
+  {id:'txt',icon:'📝',label:'Texto',w:380,h:80,txt:'SECCIÓN TEXTO'},
+  {id:'form',icon:'📋',label:'Formulario',w:380,h:125,txt:'FORMULARIO'},
+  {id:'footer',icon:'🪨',label:'Footer',w:820,h:52,txt:'FOOTER'},
+  {id:'sidebar',icon:'📂',label:'Sidebar',w:190,h:200,txt:'SIDEBAR'},
+  {id:'btn',icon:'🔘',label:'Botón',w:120,h:36,txt:'BOTÓN CTA'},
+];
+
+function initWF(){
+  const pal=document.getElementById('wf-pal');
+  WF_COMPS.forEach(comp=>{
+    const d=document.createElement('div');d.className='wf-chip';
+    d.innerHTML=`<span class="wf-chip-ico">${comp.icon}</span><span class="wf-chip-lbl">${comp.label}</span>`;
+    d.onclick=()=>addWFComp(comp);pal.appendChild(d);
+  });
+  const svg=document.getElementById('wf-svg');
+  let drawing=false,drawEl=null,sx=0,sy=0;
+  const getPos=(e)=>{const r=svg.getBoundingClientRect();const scX=900/r.width,scY=500/r.height;return{x:(e.clientX-r.left)*scX,y:(e.clientY-r.top)*scY};};
+  svg.addEventListener('mousedown',(e)=>{
+    if(G.wfTool==='drw'){const p=getPos(e);sx=p.x;sy=p.y;drawEl={id:wfId++,comp:'custom',txt:'Elemento',icon:'⬜',x:sx,y:sy,w:4,h:4};G.wfEls.push(drawEl);renderWF();drawing=true;}
+    else if(G.wfTool==='txt'){const p=getPos(e);const txt=prompt('Texto para el wireframe:','Etiqueta');if(txt){G.wfEls.push({id:wfId++,comp:'lbl',txt:txt,icon:'📝',x:p.x-55,y:p.y-14,w:110,h:28});renderWF();}}
+  });
+  window.addEventListener('mousemove',(e)=>{if(drawing&&drawEl){const p=getPos(e);drawEl.x=Math.min(sx,p.x);drawEl.y=Math.min(sy,p.y);drawEl.w=Math.abs(p.x-sx);drawEl.h=Math.abs(p.y-sy);renderWF();}});
+  window.addEventListener('mouseup',()=>{if(drawing&&drawEl&&drawEl.w<10){G.wfEls=G.wfEls.filter(e=>e.id!==drawEl.id);}drawing=false;drawEl=null;renderWF();});
+}
+
+function addWFComp(comp){
+  const placed=G.wfEls.length;
+  G.wfEls.push({id:wfId++,comp:comp.id,txt:comp.txt,icon:comp.icon,x:30+(placed*13)%560,y:20+(placed*11)%360,w:Math.min(comp.w,840),h:comp.h});
+  renderWF();gainXP(8);
+  document.getElementById('wf-empty').style.opacity='0';
+  addDecAuto('Componente añadido: '+comp.label);
+}
+
+function renderWF(){
+  const svg=document.getElementById('wf-svg');
+  const defs=svg.querySelector('defs');const base=svg.querySelector('rect');
+  svg.innerHTML='';if(defs)svg.appendChild(defs);if(base)svg.appendChild(base);
+  G.wfEls.forEach(el=>{
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('transform',`translate(${el.x},${el.y})`);g.style.cursor='move';
+    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('width',el.w);r.setAttribute('height',el.h);
+    r.setAttribute('fill','rgba(200,136,42,.05)');r.setAttribute('stroke','rgba(200,136,42,.55)');
+    r.setAttribute('stroke-width','1.5');r.setAttribute('rx','2');g.appendChild(r);
+    if(el.w>100&&el.h>50){
+      const d1=document.createElementNS('http://www.w3.org/2000/svg','line');d1.setAttribute('x1','0');d1.setAttribute('y1','0');d1.setAttribute('x2',el.w);d1.setAttribute('y2',el.h);d1.setAttribute('stroke','rgba(200,136,42,.15)');d1.setAttribute('stroke-width','1');g.appendChild(d1);
+      const d2=document.createElementNS('http://www.w3.org/2000/svg','line');d2.setAttribute('x1',el.w);d2.setAttribute('y1','0');d2.setAttribute('x2','0');d2.setAttribute('y2',el.h);d2.setAttribute('stroke','rgba(200,136,42,.15)');d2.setAttribute('stroke-width','1');g.appendChild(d2);
+    }
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',el.w/2);t.setAttribute('y',el.h/2+4);t.setAttribute('text-anchor','middle');t.setAttribute('fill','rgba(200,136,42,.8)');t.setAttribute('font-size',Math.min(12,el.h*.35));t.setAttribute('font-family','Cinzel,serif');t.textContent=el.txt;g.appendChild(t);
+    const ico=document.createElementNS('http://www.w3.org/2000/svg','text');ico.setAttribute('x','7');ico.setAttribute('y','15');ico.setAttribute('font-size','11');ico.textContent=el.icon;g.appendChild(ico);
+    const del=document.createElementNS('http://www.w3.org/2000/svg','g');del.setAttribute('transform',`translate(${el.w-13},4)`);del.style.cursor='pointer';
+    const dc=document.createElementNS('http://www.w3.org/2000/svg','circle');dc.setAttribute('r','6');dc.setAttribute('fill','rgba(122,28,28,.75)');del.appendChild(dc);
+    const dt=document.createElementNS('http://www.w3.org/2000/svg','text');dt.setAttribute('text-anchor','middle');dt.setAttribute('dominant-baseline','middle');dt.setAttribute('fill','white');dt.setAttribute('font-size','8');dt.textContent='✕';del.appendChild(dt);
+    del.addEventListener('click',(e)=>{e.stopPropagation();G.wfEls=G.wfEls.filter(e2=>e2.id!==el.id);renderWF();document.getElementById('wf-cnt').textContent=G.wfEls.length;});
+    g.appendChild(del);
+    // Drag
+    let drag=false,ox=0,oy=0;
+    g.addEventListener('mousedown',(e)=>{
+      if(G.wfTool==='era'){G.wfEls=G.wfEls.filter(e2=>e2.id!==el.id);renderWF();document.getElementById('wf-cnt').textContent=G.wfEls.length;return;}
+      if(G.wfTool!=='sel')return;
+      e.preventDefault();drag=true;
+      const sv=document.getElementById('wf-svg').getBoundingClientRect();
+      ox=e.clientX*(900/sv.width)-sv.left*(900/sv.width)-el.x;
+      oy=e.clientY*(500/sv.height)-sv.top*(500/sv.height)-el.y;
+    });
+    window.addEventListener('mousemove',(e)=>{
+      if(!drag)return;
+      const sv=document.getElementById('wf-svg').getBoundingClientRect();
+      const sx=900/sv.width,sy=500/sv.height;
+      el.x=Math.max(0,Math.min(900-el.w,e.clientX*sx-sv.left*sx-ox));
+      el.y=Math.max(0,Math.min(500-el.h,e.clientY*sy-sv.top*sy-oy));
+      g.setAttribute('transform',`translate(${el.x},${el.y})`);
+    });
+    window.addEventListener('mouseup',()=>{drag=false;});
+    svg.appendChild(g);
+  });
+  document.getElementById('wf-cnt').textContent=G.wfEls.length;
+}
+
+// Llamar initWF aquí, ya con WF_COMPS declarado
+initWF();
+
+function setWFT(t){
+  G.wfTool=t;
+  ['sel','drw','txt','era'].forEach(n=>{const b=document.getElementById('wt-'+n);if(b)b.classList.toggle('act',n===t);});
+  const w=document.getElementById('wf-wrap');w.style.cursor=t==='drw'?'crosshair':t==='txt'?'text':t==='era'?'not-allowed':'default';
+}
+function clearWF(){if(G.wfEls.length&&confirm('¿Limpiar el wireframe?')){G.wfEls=[];renderWF();document.getElementById('wf-empty').style.opacity='.45';}}
+
+// ─── DECISIONS ───
+function addDecAuto(txt){addDecEntry('[AUTO]',txt);}
+function addDec(){const v=document.getElementById('dec-in').value.trim();if(!v)return;addDecEntry('[NOTA]',v);document.getElementById('dec-in').value='';}
+function addDecEntry(cat,txt){const t=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});G.decs.push({cat,txt,t});const log=document.getElementById('dec-log');if(log){log.innerHTML=G.decs.slice(-8).map(d=>`<div class="dec"><span class="dec-t">${d.t}</span> <span class="dec-c">${d.cat}</span>${d.txt}</div>`).join('');log.scrollTop=log.scrollHeight;}}
+
+// ─── COLORS ───
+function pickCol(role,hex,el){
+  G.cols[role]=hex;
+  if(el){document.querySelectorAll(`[data-role="${role}"]`).forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
+  const lbl=document.getElementById('c-'+role.substring(0,3)+'-lbl');if(lbl)lbl.textContent=hex;
+  updateCPrev();gainXP(4);addDecAuto('Color '+role+' → '+hex);
+}
+function updateCPrev(){
+  const{primary:p,secondary:s,accent:a}=G.cols;
+  const get=id=>document.getElementById(id);
+  if(get('cpn'))get('cpn').style.background=p;
+  if(get('cph'))get('cph').style.background=a.toLowerCase().startsWith('#f')||a.toLowerCase().startsWith('#e')?'#1a1008':a;
+  if(get('cpht'))get('cpht').style.color=s;
+  if(get('cphb'))get('cphb').style.background=p;
+  if(get('cpbd'))get('cpbd').style.background=a;
+  if(get('ps-p'))get('ps-p').style.background=p;
+  if(get('ps-s'))get('ps-s').style.background=s;
+  if(get('ps-a'))get('ps-a').style.background=a;
+}
+
+// ─── FONTS ───
+function pickFont(role,name,el){
+  G.fonts[role]=name;
+  const grid=role==='title'?'title-fonts':'body-fonts';
+  document.querySelectorAll('#'+grid+' .font-card').forEach(c=>c.classList.remove('sel-f'));
+  if(el)el.classList.add('sel-f');
+  if(role==='title'){const tp=document.getElementById('tp-title');if(tp)tp.style.fontFamily="'"+name+"',serif";const tl=document.getElementById('tp-f1');if(tl)tl.textContent='Títulos: '+name;}
+  else{const tp=document.getElementById('tp-body');if(tp)tp.style.fontFamily="'"+name+"',serif";const tl=document.getElementById('tp-f2');if(tl)tl.textContent='Cuerpo: '+name;}
+  gainXP(5);addDecAuto('Fuente '+role+': '+name);ach('✍️','Fuente elegida','Tipografía '+name+' asignada');
+}
+
+// ─── STRUCTURE ───
+const STR_DEFS={
+  nav:{label:'Barra de Navegación',h:42,bg:'rgba(78,120,56,.1)',bc:'rgba(78,120,56,.48)',tc:'var(--sage)',ico:'🧭'},
+  hero:{label:'Hero / Banner',h:98,bg:'rgba(200,136,42,.09)',bc:'rgba(200,136,42,.48)',tc:'var(--ochre)',ico:'🏔️'},
+  about:{label:'Sobre Nosotros',h:78,bg:'rgba(196,114,42,.09)',bc:'rgba(196,114,42,.45)',tc:'var(--clay2)',ico:'📖'},
+  srv:{label:'Servicios / Galería',h:88,bg:'rgba(200,160,80,.08)',bc:'rgba(200,160,80,.43)',tc:'var(--bone)',ico:'🛠️'},
+  test:{label:'Testimonios',h:68,bg:'rgba(122,28,28,.09)',bc:'rgba(122,28,28,.43)',tc:'#d4624a',ico:'💬'},
+  contact:{label:'Contacto',h:88,bg:'rgba(40,72,112,.09)',bc:'rgba(40,72,112,.43)',tc:'#7ab0e0',ico:'✉️'},
+  footer:{label:'Pie de Página',h:42,bg:'rgba(46,31,14,.28)',bc:'rgba(107,80,48,.43)',tc:'var(--ash)',ico:'🪨'},
+};
+function addStrSec(type){
+  const def=STR_DEFS[type];
+  G.strSecs.push({id:strId++,type,def});renderStr();gainXP(8);addDecAuto('Sección: '+def.label);
+  document.getElementById('str-cfg').style.display='block';
+}
+function renderStr(){
+  const cv=document.getElementById('str-canvas');const empty=document.getElementById('str-empty');
+  Array.from(cv.querySelectorAll('.sz')).forEach(z=>z.remove());
+  if(!G.strSecs.length){if(empty)empty.style.opacity='.38';return;}
+  if(empty)empty.style.opacity='0';
+  G.strSecs.forEach(sec=>{
+    const d=sec.def;const z=document.createElement('div');z.className='sz filled';
+    z.style.cssText=`min-height:${d.h}px;background:${d.bg};border-color:${d.bc}`;
+    z.innerHTML=`<span style="font-family:var(--font-title);font-size:.66rem;color:${d.tc};letter-spacing:2px">${d.ico} ${d.label}</span><button class="sz-del" onclick="removeStr(${sec.id})">✕</button>`;
+    cv.appendChild(z);
+  });
+  const cnt=G.strSecs.length;
+  document.getElementById('str-cnt').textContent=cnt;
+  document.getElementById('str-bar').style.width=Math.min(100,(cnt/6)*100)+'%';
+}
+function removeStr(id){G.strSecs=G.strSecs.filter(s=>s.id!==id);renderStr();}
+function clearStr(){if(confirm('¿Limpiar la estructura?')){G.strSecs=[];renderStr();}}
+
+// ─── STARS ───
+function setStar(i,v){G.stars[i]=v;document.querySelectorAll('#st'+i+' .star').forEach((s,j)=>s.classList.toggle('lit',j<v));gainXP(5);}
+
+// ─── SHOT TRACKER ───
+function togShot(i){G.shots[i]=!G.shots[i];document.getElementById('sc'+i).classList.toggle('done',G.shots[i]);if(G.shots[i])gainXP(15);const d=G.shots.filter(Boolean).length;document.getElementById('shot-cnt').textContent=d+'/6';document.getElementById('shot-prg').style.width=(d/6*100)+'%';const st=document.getElementById('shot-st');if(d===6){st.textContent='✅ ¡Todas las evidencias!';st.style.color='var(--sage)';earnBadge(6);ach('📜','Cronista Ancestral','¡Todas las evidencias documentadas!');}else st.textContent=d+' de 6 evidencias';}
+
+// ─── BITÁCORA ───
+let svTmr;
+function onBI(){const t=(document.getElementById('bita-ed').innerText||'').trim().split(/\s+/).filter(w=>w).length;document.getElementById('wc').textContent=t;const dot=document.getElementById('sdot');dot.className='save-dot sv';document.getElementById('slbl').textContent='Guardando...';clearTimeout(svTmr);svTmr=setTimeout(()=>{saveB();dot.className='save-dot ok';document.getElementById('slbl').textContent='Guardado';setTimeout(()=>{dot.className='save-dot';document.getElementById('slbl').textContent='Guardado automático';},2000);},1200);}
+function saveB(){const ed=document.getElementById('bita-ed');if(ed)localStorage.setItem('com_bita',ed.innerHTML);const now=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});document.getElementById('lastsv').textContent=now;}
+function loadB(){const d=localStorage.getItem('com_bita');if(d){const ed=document.getElementById('bita-ed');if(ed)ed.innerHTML=d;}}
+function fmtB(cmd,val){document.execCommand(cmd,false,val||null);document.getElementById('bita-ed').focus();}
+function insertDiv(){document.execCommand('insertHTML',false,'<hr style="border:none;border-top:1px solid rgba(200,136,42,.28);margin:13px 0;">');document.getElementById('bita-ed').focus();}
+function handleImg(e){const file=e.target.files[0];if(!file)return;const rdr=new FileReader();rdr.onload=ev=>{document.getElementById('bita-ed').focus();document.execCommand('insertImage',false,ev.target.result);const strip=document.getElementById('img-strip');const d=document.createElement('div');d.className='img-thumb';d.innerHTML=`<img src="${ev.target.result}"><button class="idel" onclick="this.parentNode.remove()">✕</button>`;strip.appendChild(d);gainXP(8);saveB();};rdr.readAsDataURL(file);e.target.value='';}
+function exportBita(){const ed=document.getElementById('bita-ed').innerHTML;const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bitácora COMUNICAR</title><style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;padding:40px;color:#222;line-height:1.85;background:#faf5ec}h1{color:#7a3a18;border-bottom:2px solid #c4622a;padding-bottom:14px}h3{color:#5a2800}img{max-width:100%;border:1px solid #ccc;margin:8px 0}</style></head><body><h1>📜 Bitácora del Arquitecto — COMUNICAR</h1><p style="color:#888;font-size:.85rem">${new Date().toLocaleDateString('es-CO',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>${ed}</body></html>`;const b=new Blob([html],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Bitacora_COMUNICAR.html';a.click();gainXP(20);ach('📄','Bitácora Exportada','Tu diario de arquitecto está listo');}
+
+// ─── HELP ───
+function showHelp(k){const t={wf:'Cómo usar el Constructor de Wireframes'};const b={wf:'<p style="margin-bottom:10px">1. <strong style="color:var(--ochre)">Añadir componentes:</strong> Haz clic en los chips de la paleta para añadir elementos al lienzo.</p><p style="margin-bottom:10px">2. <strong style="color:var(--ochre)">Seleccionar:</strong> En modo ↖ puedes arrastrar cualquier elemento. Haz clic en ✕ para eliminar.</p><p style="margin-bottom:10px">3. <strong style="color:var(--ochre)">Dibujar:</strong> En modo ✏️ haz clic y arrastra para crear un rectángulo libre.</p><p>4. <strong style="color:var(--ochre)">Texto:</strong> En modo T haz clic en el lienzo para añadir una etiqueta.</p>'};document.getElementById('help-ttl').textContent=t[k]||'Ayuda';document.getElementById('help-body').innerHTML=b[k]||'';document.getElementById('help-modal').classList.add('open');}
+
+// ─── FINAL ───
+function showFinal(){
+  earnBadge(7);const fs=document.getElementById('final');fs.style.display='flex';
+  document.getElementById('f-xp').textContent=G.xp;document.getElementById('f-lvl').textContent=G.level;document.getElementById('f-bdg').textContent=G.badges.filter(Boolean).length;
+  const emos=['🗿','🌐','🕸️','🎨','✍️','🏗️','🤝','📜'];document.getElementById('f-brow').innerHTML=G.badges.map((e,i)=>e?`<span style="filter:drop-shadow(0 0 8px rgba(200,136,42,.8))">${emos[i]}</span>`:'').join('');
+  setInterval(()=>{const c=document.getElementById('f-embers');for(let i=0;i<3;i++){const e=document.createElement('div');e.className='ember';e.style.cssText=`left:${20+Math.random()*60}%;bottom:100px;width:${2+Math.random()*3}px;height:${2+Math.random()*3}px;background:${Math.random()>.5?'#c4622a':'#e8a820'};--dx:${(Math.random()*80-40)}px;animation-duration:${2+Math.random()*3}s;`;c.appendChild(e);setTimeout(()=>e.remove(),5000);}},900);
+  ach('👑','Gran Arquitecto Digital','¡Portal de la tribu WIRA completado!');
+}
+function exportReport(){
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte COMUNICAR</title><style>body{font-family:Georgia,serif;max-width:780px;margin:40px auto;padding:40px;background:#1a1008;color:#f2deb8;line-height:1.85}h1{color:#c8882a;border-bottom:1px solid #c4622a;padding-bottom:12px}h2{color:#e8a820;margin-top:22px}.stat{display:inline-block;margin:8px 14px;text-align:center}.sv{font-size:1.7rem;font-weight:bold;color:#c8882a;display:block}.sl{font-size:.72rem;color:#6b5030}</style></head><body><h1>🪨 COMUNICAR — Arquitectos Digitales de la Tribu</h1><p style="color:#6b5030">${new Date().toLocaleDateString('es-CO',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p><div><div class="stat"><span class="sv">${G.xp}</span><span class="sl">XP Total</span></div><div class="stat"><span class="sv">${G.level}</span><span class="sl">Nivel</span></div><div class="stat"><span class="sv">${G.badges.filter(Boolean).length}/8</span><span class="sl">Insignias</span></div></div><h2>🎨 Paleta de Colores</h2><p>Primario: ${G.cols.primary} · Secundario: ${G.cols.secondary} · Fondo: ${G.cols.accent}</p><h2>✍️ Tipografías</h2><p>Títulos: ${G.fonts.title} · Cuerpo: ${G.fonts.body}</p><h2>🏗️ Estructura del Portal</h2><ul>${G.strSecs.map(s=>'<li>'+s.def.label+'</li>').join('')||'<li>(Sin secciones)</li>'}</ul><h2>🕸️ Wireframe</h2><p>${G.wfEls.length} componentes posicionados</p><h2>📋 Decisiones de Diseño</h2><ul>${G.decs.slice(-12).map(d=>`<li><em>${d.t}</em> ${d.cat} ${d.txt}</li>`).join('')||'<li>(Sin decisiones registradas)</li>'}</ul><h2>📸 Evidencias Marcadas</h2>${G.shots.map((v,i)=>`<p>${v?'✅':'❌'} Evidencia ${i+1}</p>`).join('')}</body></html>`;
+  const b=new Blob([html],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Reporte_COMUNICAR.html';a.click();
+}
+</script>
+</body>
+</html>
